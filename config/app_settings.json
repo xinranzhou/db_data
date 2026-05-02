@@ -1,0 +1,43 @@
+{
+  "account": {
+    "display_name": "Super Administrator",
+    "account_id": "930e3161-de3f-4cae-b815-9e7dc238995d",
+    "workspace": "默认工作区"
+  },
+  "auth": {
+    "token": "mock-token-4ebc90d1c5eb4b889bc3fded3ab2c872",
+    "expires_at": 1778086487273,
+    "timestamp": "",
+    "admin": {
+      "id": "930e3161-de3f-4cae-b815-9e7dc238995d",
+      "username": "admin",
+      "nickname": "Super Administrator"
+    },
+    "device_id": ""
+  },
+  "capture": {
+    "enabled": true,
+    "tool": "mitmproxy",
+    "listen_host": "0.0.0.0",
+    "listen_port": 8081,
+    "asset_port": 8765,
+    "patterns_text": "/wxmapi/wxsearch/search",
+    "platform": "ios",
+    "android_proxy_auto_apply": true,
+    "ios_proxy_manual": true,
+    "max_body_kb": 512,
+    "export_default_name": "captures.xlsx"
+  },
+  "data_capture": {
+    "selected_platform": "meituan",
+    "selected_interface_key": "shop_list",
+    "structured_export_name": "dianping_shop.xlsx"
+  },
+  "adb": {
+    "adb_path": "/Users/xinranzhou/Library/Android/sdk/platform-tools/adb",
+    "remote_address": "192.168.1.5:39983",
+    "pair_address": "",
+    "proxy_backup": "",
+    "last_applied_proxy": "192.168.1.7:8081"
+  }
+}

@@ -1,0 +1,26 @@
+opencv-python>=4.5.0
+numpy>=1.20.0
+pillow>=9.0.0
+pyautogui>=0.9.53
+
+# GUI框架
+PyQt5>=5.15.0
+
+# 配置和日志
+pyyaml>=6.0
+loguru>=0.6.0
+
+# 重试机制
+tenacity>=8.0.0
+
+# 环境变量
+python-dotenv>=0.19.0
+
+# 抓包与数据导出
+mitmproxy>=10.1.0
+qrcode[pil]>=7.4.2
+openpyxl>=3.1.0
+playwright>=1.52.0
+
+# macOS特定（可选，优化性能）
+pyobjc-framework-Quartz>=8.0

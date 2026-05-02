@@ -1,0 +1,34 @@
+[
+  {
+    "shop_id": "1880559709",
+    "shop_uuid": "k2Nc7DRW5KsRYyj3",
+    "name": "青松宇大汗·碳烤羊腿",
+    "district": "固戍",
+    "rating": 4.6,
+    "avg_price": 89
+  },
+  {
+    "shop_id": "67462688",
+    "shop_uuid": "H4DWtCxBJuryVMNl",
+    "name": "金喜好汤料干货店",
+    "district": "水头",
+    "rating": 0,
+    "avg_price": 0
+  },
+  {
+    "shop_id": "40404040",
+    "shop_uuid": "ijXErhU4S0VasRvM",
+    "name": "海东蔬菜档",
+    "district": "水头",
+    "rating": 0,
+    "avg_price": 0
+  },
+  {
+    "shop_id": "50505050",
+    "shop_uuid": "MissingShopUuid123",
+    "name": "不存在的店铺",
+    "district": "未知",
+    "rating": 0,
+    "avg_price": 0
+  }
+]

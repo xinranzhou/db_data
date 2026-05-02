@@ -1,0 +1,124 @@
+{
+  "key": "shop_list",
+  "name": "点评列表接口",
+  "platform": "meituan",
+  "enabled": true,
+  "priority": 10,
+  "url_pattern": "/wxmapi/wxsearch/search",
+  "entity_code": "dianping_shop",
+  "record_key": {
+    "mode": "path",
+    "expr": "shopInfo.shopUuid"
+  },
+  "root_path": "data",
+  "list_path": "list",
+  "overwrite_existing": false,
+  "processor": "data.structured_capture:enrich_dianping_shop_list_record",
+  "fields": [
+    {
+      "target": "shop_id",
+      "source": "shopInfo.id",
+      "type": "string"
+    },
+    {
+      "target": "shop_uuid",
+      "source": "shopInfo.shopUuid",
+      "type": "string"
+    },
+    {
+      "target": "name",
+      "source": "shopInfo.name",
+      "type": "string"
+    },
+    {
+      "target": "rating",
+      "source": "shopInfo.starScore",
+      "type": "float",
+      "default": 0
+    },
+    {
+      "target": "starScore",
+      "source": "shopInfo.starScore",
+      "type": "float",
+      "default": 0
+    },
+    {
+      "target": "avg_price",
+      "source": "shopInfo.priceText",
+      "type": "float",
+      "default": 0
+    },
+    {
+      "target": "price_text",
+      "source": "shopInfo.priceText",
+      "type": "string"
+    },
+    {
+      "target": "district",
+      "source": "shopInfo.districtName",
+      "type": "string"
+    },
+    {
+      "target": "region_name",
+      "source": "shopInfo.regionName",
+      "type": "string"
+    },
+    {
+      "target": "shop_type",
+      "source": "shopInfo.shopType",
+      "type": "int"
+    },
+    {
+      "target": "category_name",
+      "source": "shopInfo.categoryName",
+      "type": "string"
+    },
+    {
+      "target": "tags",
+      "source": "shopInfo.tagList",
+      "type": "string",
+      "array_mode": "pluck_join",
+      "item_field": "text",
+      "joiner": " | "
+    },
+    {
+      "target": "promotion_titles",
+      "source": "shopInfo.shopDealInfos",
+      "type": "string",
+      "array_mode": "pluck_join",
+      "item_field": "dealTitle",
+      "joiner": " | "
+    },
+    {
+      "target": "status_labels",
+      "source": "shopInfo.shopStateInformation",
+      "type": "string",
+      "array_mode": "pluck_join",
+      "item_field": "text",
+      "joiner": " | "
+    }
+  ],
+  "export_columns": [
+    "shop_id",
+    "shop_uuid",
+    "name",
+    "region_name",
+    "shop_type",
+    "starScore",
+    "rating",
+    "avg_price",
+    "price_text",
+    "district",
+    "category_name",
+    "tags",
+    "promotion_titles",
+    "status_labels",
+    "has_phone",
+    "phone",
+    "new_phone_flag",
+    "contacted",
+    "detail_fetch_status",
+    "detail_fetch_time",
+    "detail_error_message"
+  ]
+}

@@ -1,0 +1,127 @@
+{
+    "code": 200,
+    "data": {
+        "queryId": "c31206e4-77dd-402a-9fd9-e153570bcc56",
+        "isEnd": true,
+        "nextStartIndex": 12,
+        "list": [
+            {
+                "type": 1,
+                "shopInfo": {
+                    "adShop": false,
+                    "authorityLabelColor": "#22A3DD",
+                    "branchName": "",
+                    "categoryId": 34286,
+                    "categoryName": "生鲜",
+                    "cityId": 7,
+                    "defaultPic": "https://p0.meituan.net/poipicadd/1aac4725d2be8761b43a962f6816dab9179539.jpg%40180w_180h_1e_1c_1l%7Cwatermark%3D1%26%26r%3D1%26p%3D9%26x%3D2%26y%3D2%26relative%3D1%26o%3D20",
+                    "name": "金喜好汤料干货店",
+                    "priceText": "",
+                    "regionName": "水头",
+                    "reviewCount": 0,
+                    "searchDishList": [],
+                    "shopDealInfos": [],
+                    "shopPower": 0,
+                    "shopStateInformation": [
+                        {
+                            "alignType": 1,
+                            "backgroundColor": "#FF6633",
+                            "borderColor": "ff6633",
+                            "cornerRadius": 1,
+                            "fontSize": 11,
+                            "icon": "",
+                            "iconAlignType": 0,
+                            "iconCornerRadius": 0,
+                            "iconHeight": 0,
+                            "iconTextSpacing": 0,
+                            "iconType": 0,
+                            "iconWidth": 0,
+                            "keepStyle": 1,
+                            "lineNum": 0,
+                            "priority": 2,
+                            "tagHeight": 0,
+                            "tagName": "status",
+                            "text": "新店",
+                            "textColor": "#FFFFFF",
+                            "textSource": "secondLineShopStatus",
+                            "textType": 0,
+                            "type": 12
+                        }
+                    ],
+                    "shopType": 10,
+                    "tagList": [],
+                    "starScore": 0,
+                    "labelStyle": "linear-gradient(to right bottom, rgba(34, 163, 221, 0.7), #22A3DD)",
+                    "shopIndex": 10,
+                    "listStart": 10,
+                    "myLat": "22.60354656232351",
+                    "myLng": "113.8404336764612",
+                    "shopUuid": "H4DWtCxBJuryVMNl",
+                    "shop_uuid": "H4DWtCxBJuryVMNl",
+                    "navData": {
+                        "url": "/pages/detail/detail?shopUuid=H4DWtCxBJuryVMNl&shopType=10"
+                    }
+                }
+            },
+            {
+                "type": 1,
+                "shopInfo": {
+                    "adShop": false,
+                    "authorityLabelColor": "#22A3DD",
+                    "branchName": "",
+                    "categoryId": 34286,
+                    "categoryName": "生鲜",
+                    "cityId": 7,
+                    "defaultPic": "https://p0.meituan.net/bdb/60a6488c80e44edf027ed24138206a4c30110.jpg%40180w_180h_1e_1c_1l%7Cwatermark%3D1%26%26r%3D1%26p%3D9%26x%3D2%26y%3D2%26relative%3D1%26o%3D20",
+                    "name": "海东蔬菜档",
+                    "priceText": "",
+                    "regionName": "水头",
+                    "reviewCount": 0,
+                    "searchDishList": [],
+                    "shopDealInfos": [],
+                    "shopPower": 0,
+                    "shopStateInformation": [
+                        {
+                            "alignType": 1,
+                            "backgroundColor": "#FF6633",
+                            "borderColor": "ff6633",
+                            "cornerRadius": 1,
+                            "fontSize": 11,
+                            "icon": "",
+                            "iconAlignType": 0,
+                            "iconCornerRadius": 0,
+                            "iconHeight": 0,
+                            "iconTextSpacing": 0,
+                            "iconType": 0,
+                            "iconWidth": 0,
+                            "keepStyle": 1,
+                            "lineNum": 0,
+                            "priority": 2,
+                            "tagHeight": 0,
+                            "tagName": "status",
+                            "text": "新店",
+                            "textColor": "#FFFFFF",
+                            "textSource": "secondLineShopStatus",
+                            "textType": 0,
+                            "type": 12
+                        }
+                    ],
+                    "shopType": 10,
+                    "tagList": [],
+                    "starScore": 0,
+                    "labelStyle": "linear-gradient(to right bottom, rgba(34, 163, 221, 0.7), #22A3DD)",
+                    "shopIndex": 11,
+                    "listStart": 10,
+                    "myLat": "22.60354656232351",
+                    "myLng": "113.8404336764612",
+                    "shopUuid": "ijXErhU4S0VasRvM",
+                    "shop_uuid": "ijXErhU4S0VasRvM",
+                    "navData": {
+                        "url": "/pages/detail/detail?shopUuid=ijXErhU4S0VasRvM&shopType=10"
+                    }
+                }
+            }
+        ]
+    },
+    "loginCode": 200
+}

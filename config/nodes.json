@@ -1,0 +1,152 @@
+{
+  "version": "1.0",
+  "device_id": "iPhone_12_Pro",
+  "template_dir": "templates",
+  "nodes": [
+    {
+      "id": "node_001",
+      "name": "点击美食",
+      "type": "click",
+      "template": "t1.png",
+      "threshold": 0.85,
+      "cached_rect": null,
+      "cached_center": null,
+      "retry": 3,
+      "delay_after": 1.0,
+      "is_init": true,
+      "position": {
+        "x": -485.8,
+        "y": -428.2
+      },
+      "is_start": false,
+      "continue_on_fail": false
+    },
+    {
+      "id": "node_002",
+      "name": "验证列表页",
+      "type": "verify",
+      "template": "m2.png",
+      "threshold": 0.7,
+      "timeout": 5.0,
+      "is_init": false,
+      "position": {
+        "x": -390.3,
+        "y": -87.2
+      },
+      "delay_after": 0.5,
+      "is_start": false,
+      "continue_on_fail": false
+    },
+    {
+      "id": "node_003",
+      "name": "向上滑动",
+      "type": "swipe",
+      "cached_rect": null,
+      "delay_after": 0.5,
+      "is_init": true,
+      "position": {
+        "x": 91.6,
+        "y": 94.2
+      },
+      "is_start": false,
+      "continue_on_fail": false,
+      "swipe_direction": "down",
+      "swipe_distance": 1000,
+      "success_on_max_swipes": false,
+      "next_node": "node_006"
+    },
+    {
+      "id": "node_004",
+      "name": "滑动列表",
+      "type": "swipe",
+      "cached_rect": null,
+      "delay_after": 0.5,
+      "swipe_direction": "up",
+      "swipe_distance": 800,
+      "swipe_duration": 0.5,
+      "max_failures": 3,
+      "stop_threshold": 0.8,
+      "position": {
+        "x": -383.8,
+        "y": 228.3
+      },
+      "is_start": false,
+      "is_init": false,
+      "continue_on_fail": false,
+      "success_on_max_swipes": true,
+      "max_steps": 100,
+      "next_node": "node_005"
+    },
+    {
+      "id": "node_005",
+      "name": "判断节点",
+      "type": "verify",
+      "cached_rect": null,
+      "position": {
+        "x": -405.0,
+        "y": 445.4
+      },
+      "is_start": false,
+      "is_init": true,
+      "continue_on_fail": false,
+      "next_node": "node_003",
+      "template": "到底了.png",
+      "threshold": 0.7,
+      "delay_after": 0.5,
+      "failure_node": "node_004"
+    },
+    {
+      "id": "node_006",
+      "name": "是否回到顶部了",
+      "type": "verify",
+      "template": "m2.png",
+      "threshold": 0.7,
+      "cached_rect": null,
+      "delay_after": 0.5,
+      "position": {
+        "x": 81.4,
+        "y": 432.2
+      },
+      "is_start": false,
+      "is_init": false,
+      "continue_on_fail": false,
+      "next_node": "node_007",
+      "failure_node": "node_003"
+    },
+    {
+      "id": "node_007",
+      "name": "结束",
+      "type": "end",
+      "cached_rect": null,
+      "end_success": true,
+      "position": {
+        "x": 428.5,
+        "y": 345.8
+      },
+      "is_start": false
+    },
+    {
+      "id": "node_008",
+      "name": "开始",
+      "type": "start",
+      "cached_rect": null,
+      "position": {
+        "x": -700.8,
+        "y": -7.9
+      },
+      "is_start": true,
+      "next_node": "node_004"
+    }
+  ],
+  "scroll_config": {
+    "distance": 500,
+    "duration": 0.5,
+    "loading_done_template": "loading_done.png",
+    "loading_done_threshold": 0.8
+  },
+  "rust_config": {
+    "command": "./rust_collector",
+    "data_dir": "./data",
+    "timeout": 300
+  }
+}

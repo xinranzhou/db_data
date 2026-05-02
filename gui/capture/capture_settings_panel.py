@@ -1,0 +1,231 @@
+#!/usr/bin/env python3
+
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import (
+    QCheckBox,
+    QComboBox,
+    QFormLayout,
+    QFrame,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QScrollArea,
+    QVBoxLayout,
+    QWidget,
+)
+
+
+def build_capture_settings_page(editor):
+    page = QWidget()
+    root_layout = QVBoxLayout(page)
+    root_layout.setContentsMargins(0, 0, 0, 0)
+    root_layout.setSpacing(0)
+
+    scroll = QScrollArea()
+    scroll.setWidgetResizable(True)
+    scroll.setFrameShape(QFrame.NoFrame)
+    root_layout.addWidget(scroll)
+
+    content = QWidget()
+    scroll.setWidget(content)
+
+    layout = QVBoxLayout(content)
+    layout.setContentsMargins(0, 0, 0, 0)
+    layout.setSpacing(12)
+
+    hero_card = QFrame()
+    hero_card.setObjectName("captureHeroCard")
+    hero_layout = QHBoxLayout(hero_card)
+    hero_layout.setContentsMargins(18, 18, 18, 18)
+    hero_layout.setSpacing(16)
+
+    hero_text_layout = QVBoxLayout()
+    hero_text_layout.setSpacing(6)
+    hero_title = QLabel("抓包配置向导")
+    hero_title.setObjectName("captureHeroTitle")
+    editor.capture_overview_label = QLabel("推荐顺序：启动抓取服务 -> 给手机应用代理 -> 安装并信任 CA。")
+    editor.capture_overview_label.setWordWrap(True)
+    hero_text_layout.addWidget(hero_title)
+    hero_text_layout.addWidget(editor.capture_overview_label)
+
+    hero_action_layout = QVBoxLayout()
+    hero_action_layout.setSpacing(8)
+    editor.btn_quick_android = QPushButton("一键配置 Android 抓包")
+    editor.btn_quick_android.clicked.connect(editor._quick_setup_android_capture)
+    btn_save_settings = QPushButton("保存基础配置")
+    btn_save_settings.clicked.connect(editor._save_app_settings)
+    hero_action_layout.addWidget(editor.btn_quick_android)
+    hero_action_layout.addWidget(btn_save_settings)
+    hero_action_layout.addStretch()
+
+    hero_layout.addLayout(hero_text_layout, 1)
+    hero_layout.addLayout(hero_action_layout)
+    layout.addWidget(hero_card)
+
+    step1_card = QFrame()
+    step1_card.setObjectName("captureStepCard")
+    step1_layout = QVBoxLayout(step1_card)
+    step1_layout.setContentsMargins(18, 18, 18, 18)
+    step1_layout.setSpacing(12)
+
+    step1_header = QHBoxLayout()
+    step1_badge = QLabel("1")
+    step1_badge.setObjectName("captureStepBadge")
+    step1_title = QLabel("启动抓取服务")
+    step1_title.setObjectName("captureStepTitle")
+    editor.capture_service_step_status = QLabel("未启动")
+    editor.capture_service_step_status.setObjectName("captureStepStatus")
+    step1_header.addWidget(step1_badge)
+    step1_header.addWidget(step1_title)
+    step1_header.addStretch()
+    step1_header.addWidget(editor.capture_service_step_status)
+
+    step1_hint = QLabel("这里只保留基础开关。点评接口由“抓取实时数据”页固定选择，系统会自动同步对应的抓包规则。")
+    step1_hint.setWordWrap(True)
+
+    capture_group = QGroupBox("基础选项")
+    capture_form = QFormLayout(capture_group)
+    editor.capture_enabled_checkbox = QCheckBox("自动化启动时自动开启抓取")
+    editor.capture_platform_combo = QComboBox()
+    editor.capture_platform_combo.addItems(["android", "ios", "both"])
+    editor.capture_platform_combo.currentTextChanged.connect(editor._refresh_capture_platform_ui)
+    editor.capture_android_proxy_checkbox = QCheckBox("Android 连接成功后自动应用代理")
+    capture_form.addRow(editor.capture_enabled_checkbox)
+    capture_form.addRow("抓取平台:", editor.capture_platform_combo)
+    capture_form.addRow(editor.capture_android_proxy_checkbox)
+
+    step1_actions = QHBoxLayout()
+    btn_start_capture_quick = QPushButton("启动抓取服务")
+    btn_start_capture_quick.clicked.connect(editor._start_capture_service)
+    btn_stop_bundle_quick = QPushButton("一键停止抓包")
+    btn_stop_bundle_quick.clicked.connect(editor._stop_proxy_capture_only)
+    btn_stop_bundle_clear_quick = QPushButton("停止抓包并清除手机代理")
+    btn_stop_bundle_clear_quick.clicked.connect(editor._stop_proxy_capture_and_clear_proxy)
+    btn_refresh_capture_quick = QPushButton("刷新状态")
+    btn_refresh_capture_quick.clicked.connect(editor._refresh_capture_status)
+    step1_actions.addWidget(btn_start_capture_quick)
+    step1_actions.addWidget(btn_stop_bundle_quick)
+    step1_actions.addWidget(btn_stop_bundle_clear_quick)
+    step1_actions.addWidget(btn_refresh_capture_quick)
+    step1_actions.addStretch()
+
+    step1_layout.addLayout(step1_header)
+    step1_layout.addWidget(step1_hint)
+    step1_layout.addWidget(capture_group)
+    step1_layout.addLayout(step1_actions)
+    layout.addWidget(step1_card)
+
+    step2_card = QFrame()
+    step2_card.setObjectName("captureStepCard")
+    step2_layout = QVBoxLayout(step2_card)
+    step2_layout.setContentsMargins(18, 18, 18, 18)
+    step2_layout.setSpacing(12)
+
+    step2_header = QHBoxLayout()
+    step2_badge = QLabel("2")
+    step2_badge.setObjectName("captureStepBadge")
+    step2_title = QLabel("连接手机并应用代理")
+    step2_title.setObjectName("captureStepTitle")
+    editor.capture_proxy_step_status = QLabel("未连接设备")
+    editor.capture_proxy_step_status.setObjectName("captureStepStatus")
+    step2_header.addWidget(step2_badge)
+    step2_header.addWidget(step2_title)
+    step2_header.addStretch()
+    step2_header.addWidget(editor.capture_proxy_step_status)
+
+    step2_hint = QLabel("Android 设备连接成功后，可直接把当前抓包代理写入手机。顶部状态栏也会同步显示代理是否匹配。")
+    step2_hint.setWordWrap(True)
+
+    editor.capture_proxy_summary_label = QLabel("代理地址: -")
+    editor.capture_proxy_summary_label.setObjectName("captureInlineMeta")
+    editor.capture_device_proxy_summary_label = QLabel("手机代理: 未检测")
+    editor.capture_device_proxy_summary_label.setObjectName("captureInlineMeta")
+    editor.capture_proxy_manual_hint_label = QLabel("")
+    editor.capture_proxy_manual_hint_label.setObjectName("captureInlineMeta")
+    editor.capture_proxy_manual_hint_label.setWordWrap(True)
+
+    proxy_btn_row = QHBoxLayout()
+    editor.btn_apply_proxy_quick = QPushButton("应用手机代理")
+    editor.btn_apply_proxy_quick.clicked.connect(editor._apply_android_proxy_settings)
+    editor.btn_clear_android_proxy = QPushButton("清除手机代理")
+    editor.btn_clear_android_proxy.clicked.connect(editor._clear_android_proxy_settings)
+    editor.btn_detect_android_proxy = QPushButton("检测当前代理")
+    editor.btn_detect_android_proxy.clicked.connect(editor._detect_android_proxy_settings)
+    editor.btn_test_proxy_connectivity = QPushButton("测试代理连通性")
+    editor.btn_test_proxy_connectivity.clicked.connect(editor._test_android_proxy_connectivity)
+    proxy_btn_row.addWidget(editor.btn_apply_proxy_quick)
+    proxy_btn_row.addWidget(editor.btn_clear_android_proxy)
+    proxy_btn_row.addWidget(editor.btn_detect_android_proxy)
+    proxy_btn_row.addWidget(editor.btn_test_proxy_connectivity)
+    proxy_btn_row.addStretch()
+
+    step2_layout.addLayout(step2_header)
+    step2_layout.addWidget(step2_hint)
+    step2_layout.addWidget(editor.capture_proxy_summary_label)
+    step2_layout.addWidget(editor.capture_device_proxy_summary_label)
+    step2_layout.addWidget(editor.capture_proxy_manual_hint_label)
+    step2_layout.addLayout(proxy_btn_row)
+    layout.addWidget(step2_card)
+
+    step3_card = QFrame()
+    step3_card.setObjectName("captureStepCard")
+    step3_layout = QVBoxLayout(step3_card)
+    step3_layout.setContentsMargins(18, 18, 18, 18)
+    step3_layout.setSpacing(12)
+
+    step3_header = QHBoxLayout()
+    step3_badge = QLabel("3")
+    step3_badge.setObjectName("captureStepBadge")
+    step3_title = QLabel("安装并信任 CA 证书")
+    step3_title.setObjectName("captureStepTitle")
+    editor.capture_ca_step_status = QLabel("未就绪")
+    editor.capture_ca_step_status.setObjectName("captureStepStatus")
+    step3_header.addWidget(step3_badge)
+    step3_header.addWidget(step3_title)
+    step3_header.addStretch()
+    step3_header.addWidget(editor.capture_ca_step_status)
+
+    editor.capture_ca_url_label = QLabel("CA 下载地址: -")
+    editor.capture_ca_path_label = QLabel("CA 路径: -")
+    editor.capture_ca_url_label.setObjectName("captureInlineMeta")
+    editor.capture_ca_path_label.setObjectName("captureInlineMeta")
+    editor.capture_ca_hint_label = QLabel("Android：先应用代理，再扫描二维码下载安装证书。iOS：需手动配置 Wi-Fi 代理，并在系统设置里手动信任证书。")
+    editor.capture_ca_hint_label.setWordWrap(True)
+    editor.capture_qr_label = QLabel("二维码将在这里显示")
+    editor.capture_qr_label.setAlignment(Qt.AlignCenter)
+    editor.capture_qr_label.setMinimumSize(220, 220)
+    qr_and_text_row = QHBoxLayout()
+    qr_and_text_row.setSpacing(16)
+    qr_and_text_row.addWidget(editor.capture_qr_label, 0, Qt.AlignTop)
+
+    cert_text_layout = QVBoxLayout()
+    cert_text_layout.setSpacing(8)
+    cert_text_layout.addWidget(editor.capture_ca_url_label)
+    cert_text_layout.addWidget(editor.capture_ca_path_label)
+    cert_text_layout.addWidget(editor.capture_ca_hint_label)
+    cert_text_layout.addStretch()
+    qr_and_text_row.addLayout(cert_text_layout, 1)
+
+    cert_btn_row = QHBoxLayout()
+    btn_start_ca = QPushButton("启动 CA 下载服务")
+    btn_start_ca.clicked.connect(editor._start_ca_service)
+    btn_stop_ca = QPushButton("停止 CA 下载服务")
+    btn_stop_ca.clicked.connect(editor._stop_ca_service)
+    btn_refresh_ca = QPushButton("刷新证书状态")
+    btn_refresh_ca.clicked.connect(editor._refresh_capture_status)
+    editor.btn_https_diagnosis = QPushButton("HTTPS 诊断")
+    editor.btn_https_diagnosis.clicked.connect(editor._show_capture_https_diagnosis)
+    cert_btn_row.addWidget(btn_start_ca)
+    cert_btn_row.addWidget(btn_stop_ca)
+    cert_btn_row.addWidget(btn_refresh_ca)
+    cert_btn_row.addWidget(editor.btn_https_diagnosis)
+    cert_btn_row.addStretch()
+
+    step3_layout.addLayout(step3_header)
+    step3_layout.addLayout(qr_and_text_row)
+    step3_layout.addLayout(cert_btn_row)
+    layout.addWidget(step3_card)
+
+    layout.addStretch()
+    return page

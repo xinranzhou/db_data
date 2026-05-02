@@ -1,0 +1,69 @@
+{
+  "key": "shop_detail",
+  "name": "点评详情接口",
+  "platform": "meituan",
+  "enabled": true,
+  "priority": 20,
+  "url_pattern": "/dpcategory/unifyshopaggregate.bin",
+  "entity_code": "dianping_shop",
+  "record_key": {
+    "mode": "path",
+    "expr": "id"
+  },
+  "root_path": "data",
+  "list_path": "",
+  "overwrite_existing": false,
+  "fields": [
+    {
+      "target": "shop_id",
+      "source": "id",
+      "type": "string"
+    },
+    {
+      "target": "address",
+      "source": "address",
+      "type": "string"
+    },
+    {
+      "target": "phone",
+      "source": "phone",
+      "type": "string"
+    },
+    {
+      "target": "open_time",
+      "source": "openTime",
+      "type": "string"
+    },
+    {
+      "target": "services",
+      "source": "serviceTags",
+      "type": "string",
+      "array_mode": "pluck_join",
+      "item_field": "name",
+      "joiner": " | "
+    },
+    {
+      "target": "album_urls",
+      "source": "albums",
+      "type": "string",
+      "array_mode": "pluck_join",
+      "item_field": "url",
+      "joiner": " | "
+    },
+    {
+      "target": "album_raw",
+      "source": "albums",
+      "type": "string",
+      "array_mode": "json"
+    }
+  ],
+  "export_columns": [
+    "shop_id",
+    "address",
+    "phone",
+    "open_time",
+    "services",
+    "album_urls",
+    "album_raw"
+  ]
+}

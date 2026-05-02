@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# 日志
+logs/
+*.log
+
+# 缓存和临时文件
+config/cache.json
+*.tmp
+*.temp
+/tmp/
+test_screenshot.png
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+
+# 数据文件
+data/
+*.csv
+*.json.bak
+
+# 模板图片（可选，根据需要调整）
+# templates/*.png
+
+build
+dist
