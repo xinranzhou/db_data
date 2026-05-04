@@ -7,6 +7,10 @@ __pycache__/
 venv/
 env/
 ENV/
+*.egg-info/
+dist/
+build/
+*.egg
 
 # 日志
 logs/
@@ -17,24 +21,52 @@ config/cache.json
 *.tmp
 *.temp
 /tmp/
-test_screenshot.png
+.matplotlib/
 
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
+*.sublime-*
 
 # macOS
 .DS_Store
+.AppleDouble
+.LSOverride
+
+# 生成的图片结果
+result.jpg
+result.png
+diagnosis_best_match.jpg
+best_scale_match.jpg
+best_scale_result.jpg
+sift_result.jpg
+simple_result.jpg
+test_result.jpg
+test_template.jpg
+test_target.jpg
+match_*.jpg
+detailed_diagnosis.jpg
+
+# 安装包和构建产物
+installer/
+*.dmg
+*.app
+*.exe
+*.msi
 
 # 数据文件
 data/
 *.csv
 *.json.bak
 
-# 模板图片（可选，根据需要调整）
-# templates/*.png
+# 测试文件
+test_*.jpg
+test_*.png
+test_screenshot.png
 
-build
-dist
+# 临时文件
+xxx.txtx
+*.bak
+* copy/
