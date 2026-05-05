@@ -27,13 +27,13 @@ elseif (Get-Command python -ErrorAction SilentlyContinue) {
 }
 
 if (-not $PythonCmd) {
-    Write-Error "未找到 Python，请先安装 Python 3.8+。"
+    Write-Error "未找到 Python，请先安装 Python 3.11+。"
 }
 
-& $PythonCmd @PythonArgs -c "import sys; raise SystemExit(0 if sys.version_info >= (3, 8) else 1)" 2>$null
+& $PythonCmd @PythonArgs -c "import sys; raise SystemExit(0 if sys.version_info >= (3, 11) else 1)" 2>$null
 if ($LASTEXITCODE -ne 0) {
     $VersionText = & $PythonCmd @PythonArgs --version 2>&1
-    Write-Error "Python 版本过低: $VersionText。需要 Python 3.8+。"
+    Write-Error "Python 版本过低: $VersionText。构建环境需要 Python 3.11+。"
 }
 
 $VersionText = & $PythonCmd @PythonArgs --version 2>&1

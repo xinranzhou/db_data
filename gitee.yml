@@ -1,5 +1,6 @@
 # Gitee Go 并行构建配置
-# 目标: 合并到 release 分支后，自动并行构建
+# 唯一生产流水配置真源
+# 目标: 仅在代码合并到 release 分支后自动并行构建
 # - Windows x64
 # - macOS x86_64
 # - macOS arm64
@@ -10,17 +11,14 @@ on:
   push:
     branches:
       - release
-    tags:
-      - v*
     paths:
       - '**.py'
       - 'requirements*.txt'
       - 'build_app.py'
       - 'bootstrap_build.py'
       - 'build_release.sh'
+      - 'build_release.ps1'
       - 'gitee.yml'
-      - 'gitee_build_all_platforms.yml'
-      - '.gitee.com/gitee.yml'
       - 'node_editor_app.py'
       - 'gui/**'
       - 'integration/**'
@@ -33,11 +31,6 @@ on:
       - 'icon.icns'
       - 'icon.ico'
       - 'icon.iconset/**'
-  merge_request:
-    target: release
-  pull_request:
-    branches:
-      - release
 
 stages:
   - build-windows-x64
@@ -47,7 +40,7 @@ stages:
   - notify
 
 variables:
-  PYTHON_VERSION: '3.9'
+  PYTHON_VERSION: '3.11'
 
 build-windows-x64:
   stage: build-windows-x64
@@ -56,6 +49,7 @@ build-windows-x64:
     Write-Host "构建 Windows x64"
     Write-Host "=========================================="
 
+    python --version
     python -m pip install --upgrade pip
     pip install -r requirements.txt
     pip install pyinstaller
@@ -82,7 +76,6 @@ build-windows-x64:
     expire_in: 30 days
   only:
     - release
-    - tags
   tags:
     - windows-latest
 
@@ -93,6 +86,7 @@ build-macos-x64:
     echo "构建 macOS x86_64"
     echo "=========================================="
 
+    python3 --version
     pip3 install --upgrade pip
     pip3 install -r requirements.txt
     pip3 install pyinstaller
@@ -131,7 +125,6 @@ build-macos-x64:
     expire_in: 30 days
   only:
     - release
-    - tags
   tags:
     - macos-latest
 
@@ -142,6 +135,7 @@ build-macos-arm64:
     echo "构建 macOS arm64"
     echo "=========================================="
 
+    python3 --version
     pip3 install --upgrade pip
     pip3 install -r requirements.txt
     pip3 install pyinstaller
@@ -180,7 +174,6 @@ build-macos-arm64:
     expire_in: 30 days
   only:
     - release
-    - tags
   tags:
     - macos-silicon
 
@@ -203,7 +196,6 @@ package-all:
     expire_in: 30 days
   only:
     - release
-    - tags
 
 notify:
   stage: notify
@@ -216,4 +208,3 @@ notify:
     echo "产物: Windows x64 / macOS x86_64 / macOS arm64"
   only:
     - release
-    - tags

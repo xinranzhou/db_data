@@ -2,7 +2,7 @@
 
 ## 运行环境
 
-- Python `3.8+`
+- Python `3.11+`
 - Windows `10/11 x64`
 - macOS `10.14+`
 - 项目运行依赖 `PyQt5`、`mitmproxy`、`playwright`
@@ -148,8 +148,8 @@ python3 build_app.py --target macos-arm64
 
 输出：
 
-- `dist/macos-arm64/DianpingAutoCollector.app`
-- `installer/macos-arm64/DianpingAutoCollector-macos-arm64.dmg`
+- `dist/macos-arm64/DP采集器.app`
+- `installer/macos-arm64/DP采集器-macos-arm64.dmg`
 
 #### macOS Intel
 
@@ -163,8 +163,8 @@ python3 build_app.py --target macos-x86_64
 
 输出：
 
-- `dist/macos-x86_64/DianpingAutoCollector.app`
-- `installer/macos-x86_64/DianpingAutoCollector-macos-x86_64.dmg`
+- `dist/macos-x86_64/DP采集器.app`
+- `installer/macos-x86_64/DP采集器-macos-x86_64.dmg`
 
 #### Windows x64
 
@@ -178,8 +178,8 @@ python build_app.py --target windows-x64
 
 输出：
 
-- `dist/windows-x64/DianpingAutoCollector.exe`
-- `installer/windows-x64/DianpingAutoCollector-windows-x64.iss`
+- `dist/windows-x64/DP采集器.exe`
+- `installer/windows-x64/DP采集器-windows-x64.iss`
 
 说明：
 
@@ -225,7 +225,7 @@ python3 build_app.py --target macos-arm64 --skip-pyinstaller-install
 
 1. 按目标执行 `build_app.py`
 2. macOS 分发 `installer/<target>/` 下的 `.dmg`
-3. Windows 分发 `dist/windows-x64/DianpingAutoCollector.exe` 或继续编译 `.iss` 得到安装包
+3. Windows 分发 `dist/windows-x64/DP采集器.exe` 或继续编译 `.iss` 得到安装包
 
 ---
 
@@ -246,6 +246,10 @@ brew install create-dmg
 ### Q: Windows 只有 `.iss` 没有安装包 `.exe`
 
 A: 当前脚本会先生成 Inno Setup 脚本，需要在 Windows x64 上使用 Inno Setup 编译成最终安装包。
+
+### Q: 现在正式多平台构建由哪个配置文件驱动？
+
+A: 当前正式多平台构建以 `.github/workflows/cross-platform-build.yml` 为准。它会在 `release` 分支变更后并行构建 `Windows x64 / macOS x86_64 / macOS arm64`。`gitee.yml` 如继续保留，建议仅用于轻量校验。
 
 ### Q: 打包后登录失败怎么办？
 

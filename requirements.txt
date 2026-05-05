@@ -20,4 +20,4 @@ openpyxl>=3.1.0
 playwright>=1.52.0
 
 # macOS特定（可选，优化性能）
-pyobjc-framework-Quartz>=8.0
+pyobjc-framework-Quartz>=8.0; sys_platform == "darwin"

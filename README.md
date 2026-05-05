@@ -43,6 +43,7 @@ pip install -r requirements.txt
 说明：
 
 - 当前项目不需要 `uv`，直接使用 `venv + pip` 即可。
+- 本地运行与打包推荐统一使用 `Python 3.11+`。
 - 当前主链依赖已收敛为：
   - `PyQt5`
   - `mitmproxy`
@@ -121,6 +122,12 @@ cd /Users/xinranzhou/Documents/zft/auto_ocr/py_test
 - `windows-x64`
 - `windows-x86`
 
+当前正式发布流水线只构建：
+
+- `macos-arm64`
+- `macos-x86_64`
+- `windows-x64`
+
 ## 常用命令
 
 ### 1. 启动程序
@@ -154,14 +161,14 @@ python3 -m unittest test_auth_service.py
 
 - `archive/README.md`
 
-## Gitee CI/CD
+## CI/CD
 
-当前 Gitee CI/CD 的唯一生产配置真源是：
+当前正式构建流水线以 GitHub Actions 为准：
 
-- `gitee.yml`
+- `.github/workflows/cross-platform-build.yml`
 
 说明：
 
 - 合并到 `release` 分支后，会按 `Windows x64 / macOS x86_64 / macOS arm64` 三路并行构建
-- 指向 `release` 的合并请求会触发预检
-- 历史多份 Gitee 配置已移到 `archive/root_misc/ci_legacy/`，仅保留作参考，不再继续维护
+- 构建产物会分别上传，并额外汇总为 `all-platform-packages`
+- `gitee.yml` 如继续保留，建议仅用于轻量校验，不再作为正式多平台打包入口

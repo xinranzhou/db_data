@@ -25,13 +25,13 @@ fi
 
 if [ -z "$PYTHON_CMD" ]; then
   echo "❌ 未找到 Python 3"
-  echo "   请先安装 Python 3.8+: https://www.python.org/downloads/"
+  echo "   请先安装 Python 3.11+: https://www.python.org/downloads/"
   exit 1
 fi
 
-if ! "$PYTHON_CMD" -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 8) else 1)' >/dev/null 2>&1; then
+if ! "$PYTHON_CMD" -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 11) else 1)' >/dev/null 2>&1; then
   echo "❌ Python 版本过低: $($PYTHON_CMD --version 2>&1)"
-  echo "   需要 Python 3.8+"
+  echo "   构建环境需要 Python 3.11+"
   exit 1
 fi
 
