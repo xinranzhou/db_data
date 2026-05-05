@@ -41,19 +41,19 @@ jobs:
       matrix:
         include:
           - name: Windows x64
-            runner: windows-latest
+            runner:
+              - self-hosted
+              - windows
+              - x64
             target: windows-x64
             artifact_name: windows-x64
             package_dir: installer/windows-x64
             dist_dir: dist/windows-x64
-            package_script: |
-              $packageDir = "installer\windows-x64"
-              New-Item -ItemType Directory -Force -Path $packageDir | Out-Null
-              $packagePath = Join-Path $packageDir "DP采集器-Windows-x64-${env:GITHUB_SHA}.zip"
-              if (Test-Path $packagePath) { Remove-Item $packagePath }
-              Compress-Archive -Path "dist\windows-x64\*" -DestinationPath $packagePath
           - name: macOS x86_64
-            runner: macos-15-intel
+            runner:
+              - self-hosted
+              - macos
+              - intel
             target: macos-x86_64
             artifact_name: macos-x86_64
             package_dir: installer/macos-x86_64
@@ -78,7 +78,10 @@ jobs:
                   "$PACKAGE_PATH"
               fi
           - name: macOS arm64
-            runner: macos-latest
+            runner:
+              - self-hosted
+              - macos
+              - arm64
             target: macos-arm64
             artifact_name: macos-arm64
             package_dir: installer/macos-arm64
@@ -112,33 +115,67 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Show Python Version
-        shell: ${{ runner.os == 'Windows' && 'pwsh' || 'bash' }}
+      - name: Show Python Version on Windows
+        if: matrix.target == 'windows-x64'
+        shell: pwsh
         run: |
           python --version
 
-      - name: Install Dependencies
-        shell: ${{ runner.os == 'Windows' && 'pwsh' || 'bash' }}
+      - name: Show Python Version on macOS
+        if: matrix.target != 'windows-x64'
+        shell: bash
+        run: |
+          python --version
+
+      - name: Install Dependencies on Windows
+        if: matrix.target == 'windows-x64'
+        shell: pwsh
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pyinstaller
 
-      - name: Build App
-        shell: ${{ runner.os == 'Windows' && 'pwsh' || 'bash' }}
+      - name: Install Dependencies on macOS
+        if: matrix.target != 'windows-x64'
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build App on Windows
+        if: matrix.target == 'windows-x64'
+        shell: pwsh
+        run: |
+          python build_app.py --target ${{ matrix.target }} --skip-installer
+
+      - name: Build App on macOS
+        if: matrix.target != 'windows-x64'
+        shell: bash
         run: |
           python build_app.py --target ${{ matrix.target }} --skip-installer
 
       - name: Install create-dmg
-        if: runner.os == 'macOS'
+        if: matrix.target != 'windows-x64'
         shell: bash
         run: |
           if ! command -v create-dmg >/dev/null 2>&1; then
             brew install create-dmg
           fi
 
-      - name: Package Artifact
-        shell: ${{ runner.os == 'Windows' && 'pwsh' || 'bash' }}
+      - name: Package Artifact on Windows
+        if: matrix.target == 'windows-x64'
+        shell: pwsh
+        run: |
+          $packageDir = "installer\windows-x64"
+          New-Item -ItemType Directory -Force -Path $packageDir | Out-Null
+          $packagePath = Join-Path $packageDir "DP采集器-Windows-x64-${env:GITHUB_SHA}.zip"
+          if (Test-Path $packagePath) { Remove-Item $packagePath }
+          Compress-Archive -Path "dist\windows-x64\*" -DestinationPath $packagePath
+
+      - name: Package Artifact on macOS
+        if: matrix.target != 'windows-x64'
+        shell: bash
         run: ${{ matrix.package_script }}
 
       - name: Upload Artifact
