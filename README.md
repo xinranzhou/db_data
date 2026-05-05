@@ -171,4 +171,8 @@ python3 -m unittest test_auth_service.py
 
 - 合并到 `release` 分支后，会按 `Windows x64 / macOS x86_64 / macOS arm64` 三路并行构建
 - 构建产物会分别上传，并额外汇总为 `all-platform-packages`
+- 当前 workflow 默认面向 self-hosted runner，建议分别给三台机器配置 label：
+  - `self-hosted, windows, x64`
+  - `self-hosted, macos, intel`
+  - `self-hosted, macos, arm64`
 - `gitee.yml` 如继续保留，建议仅用于轻量校验，不再作为正式多平台打包入口
