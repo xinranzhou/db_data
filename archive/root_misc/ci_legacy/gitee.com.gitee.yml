@@ -1,0 +1,104 @@
+name: gitee-go-release-parallel
+
+on:
+  push:
+    branches:
+      - release
+    tags:
+      - v*
+    paths:
+      - '**.py'
+      - 'requirements*.txt'
+      - 'build_app.py'
+      - 'bootstrap_build.py'
+      - 'build_release.sh'
+      - '.gitee.com/gitee.yml'
+      - 'gitee.yml'
+      - 'gitee_build_all_platforms.yml'
+      - 'node_editor_app.py'
+      - 'gui/**'
+      - 'integration/**'
+      - 'config/**'
+      - 'playright/**'
+      - 'login/**'
+      - 'utils/**'
+      - 'build_hooks/**'
+      - 'tools/**'
+      - 'icon.icns'
+      - 'icon.ico'
+      - 'icon.iconset/**'
+  merge_request:
+    target: release
+  pull_request:
+    branches:
+      - release
+
+stages:
+  - build-windows-x64
+  - build-macos-x64
+  - build-macos-arm64
+  - notify
+
+build-windows-x64:
+  stage: build-windows-x64
+  script:
+    - echo "开始构建 Windows x64..."
+    - python -m pip install --upgrade pip
+    - pip install -r requirements.txt
+    - pip install pyinstaller
+    - python build_app.py --target windows-x64 --skip-installer
+  artifacts:
+    paths:
+      - dist/windows-x64/**/*
+      - installer/windows-x64/**/*
+    expire_in: 30 days
+  only:
+    - release
+    - tags
+
+build-macos-x64:
+  stage: build-macos-x64
+  script:
+    - echo "开始构建 macOS x86_64..."
+    - pip3 install --upgrade pip
+    - pip3 install -r requirements.txt
+    - pip3 install pyinstaller
+    - python3 build_app.py --target macos-x86_64 --skip-installer
+  artifacts:
+    paths:
+      - dist/macos-x86_64/**/*
+      - installer/macos-x86_64/**/*
+    expire_in: 30 days
+  only:
+    - release
+    - tags
+  tags:
+    - macos
+
+build-macos-arm64:
+  stage: build-macos-arm64
+  script:
+    - echo "开始构建 macOS arm64..."
+    - pip3 install --upgrade pip
+    - pip3 install -r requirements.txt
+    - pip3 install pyinstaller
+    - python3 build_app.py --target macos-arm64 --skip-installer
+  artifacts:
+    paths:
+      - dist/macos-arm64/**/*
+      - installer/macos-arm64/**/*
+    expire_in: 30 days
+  only:
+    - release
+    - tags
+  tags:
+    - macos-silicon
+
+notify:
+  stage: notify
+  script:
+    - echo "release 分支并行构建完成"
+    - echo "Windows x64 / macOS x86_64 / macOS arm64"
+  only:
+    - release
+    - tags

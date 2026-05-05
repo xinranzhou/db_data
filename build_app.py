@@ -6,6 +6,7 @@
 - macos-arm64
 - macos-x86_64
 - windows-x64
+- windows-x86
 """
 
 from __future__ import annotations
@@ -28,7 +29,7 @@ DIST_DIR = BASE_DIR / "dist"
 BUILD_DIR = BASE_DIR / "build"
 INSTALLER_DIR = BASE_DIR / "installer"
 RUNTIME_HOOKS_DIR = BASE_DIR / "build_hooks"
-SUPPORTED_TARGETS = ("macos-arm64", "macos-x86_64", "windows-x64")
+SUPPORTED_TARGETS = ("macos-arm64", "macos-x86_64", "windows-x64", "windows-x86")
 
 
 @dataclass(frozen=True)
@@ -74,6 +75,16 @@ TARGETS = {
         executable_name=f"{APP_NAME}.exe",
         bundle_mode="onefile",
     ),
+    "windows-x86": BuildTarget(
+        key="windows-x86",
+        os_name="windows",
+        arch="x86",
+        icon_name="icon.ico",
+        pyinstaller_target_arch=None,
+        installer_kind="iss",
+        executable_name=f"{APP_NAME}.exe",
+        bundle_mode="onefile",
+    ),
 }
 
 
@@ -95,6 +106,8 @@ def normalize_host_platform() -> tuple[str, str]:
         os_name = "windows"
         if machine in {"amd64", "x86_64"}:
             arch = "x64"
+        elif machine in {"x86", "i386", "i686", "AMD64"}:
+            arch = "x86"
         else:
             arch = machine
         return os_name, arch
@@ -127,11 +140,17 @@ def ensure_host_can_build(target: BuildTarget):
             f"Please build on macOS {target.arch}."
         )
 
-    if target.os_name == "windows" and host_arch != "x64":
-        raise RuntimeError(
-            f"Host architecture {host_arch} cannot build target {target.key}. "
-            "Only Windows x64 is supported by this script."
-        )
+    if target.os_name == "windows":
+        if target.arch == "x86" and host_arch not in ["x86", "x64"]:
+            raise RuntimeError(
+                f"Host architecture {host_arch} cannot build target {target.key}. "
+                "Please build on Windows x86 or x64."
+            )
+        elif target.arch == "x64" and host_arch != "x64":
+            raise RuntimeError(
+                f"Host architecture {host_arch} cannot build target {target.key}. "
+                "Only Windows x64 is supported by this script."
+            )
 
 
 def ensure_output_dirs(target: BuildTarget) -> dict[str, Path]:
@@ -155,7 +174,7 @@ def ensure_output_dirs(target: BuildTarget) -> dict[str, Path]:
 
 
 def get_data_dirs() -> list[Path]:
-    names = ["config", "templates", "tools"]
+    names = ["config", "tools"]
     result = []
     for name in names:
         path = BASE_DIR / name
@@ -165,7 +184,6 @@ def get_data_dirs() -> list[Path]:
 
 
 def build_pyinstaller_command(target: BuildTarget, paths: dict[str, Path]) -> list[str]:
-    runtime_hook = RUNTIME_HOOKS_DIR / "pyi_rth_cv2_pathfix.py"
     cmd = [
         sys.executable,
         "-m",
@@ -181,8 +199,6 @@ def build_pyinstaller_command(target: BuildTarget, paths: dict[str, Path]) -> li
         str(paths["work"]),
         "--specpath",
         str(paths["spec"]),
-        "--runtime-hook",
-        str(runtime_hook),
     ]
 
     if target.bundle_mode == "onefile":
@@ -208,7 +224,6 @@ def build_pyinstaller_command(target: BuildTarget, paths: dict[str, Path]) -> li
         "PyQt5.QtCore",
         "PyQt5.QtGui",
         "PyQt5.QtWidgets",
-        "numpy",
         "PIL",
         "loguru",
         "yaml",
@@ -243,6 +258,16 @@ def create_windows_installer(target: BuildTarget, paths: dict[str, Path]) -> Pat
     artifact = paths["dist"] / target.executable_name
     output_name = f"{APP_NAME}-Setup-{target.key}"
     iss_path = paths["installer"] / f"{APP_NAME}-{target.key}.iss"
+    architecture_lines = []
+    if target.arch == "x64":
+        architecture_lines = [
+            "ArchitecturesAllowed=x64",
+            "ArchitecturesInstallIn64BitMode=x64",
+        ]
+    elif target.arch == "x86":
+        architecture_lines = [
+            "ArchitecturesAllowed=x86",
+        ]
 
     iss_content = f"""
 [Setup]
@@ -252,13 +277,11 @@ DefaultDirName={{pf}}\\{APP_NAME}
 DefaultGroupName={APP_DISPLAY_NAME}
 OutputDir={paths["installer"]}
 OutputBaseFilename={output_name}
-ArchitecturesAllowed=x64
-ArchitecturesInstallIn64BitMode=x64
+{os.linesep.join(architecture_lines)}
 
 [Files]
 Source: "{artifact}"; DestDir: "{{app}}"
 Source: "{BASE_DIR / 'config'}\\*"; DestDir: "{{app}}\\config"; Flags: recursesubdirs
-Source: "{BASE_DIR / 'templates'}\\*"; DestDir: "{{app}}\\templates"; Flags: recursesubdirs
 Source: "{BASE_DIR / 'tools'}\\*"; DestDir: "{{app}}\\tools"; Flags: recursesubdirs
 
 [Icons]

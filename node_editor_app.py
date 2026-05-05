@@ -13,7 +13,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from utils.logger import setup_logger
 setup_logger()
 
-from gui.node_editor import main
+from gui.capture.capture_only_window import main
 
 if __name__ == '__main__':
     main()

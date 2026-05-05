@@ -11,8 +11,8 @@ import time
 from pathlib import Path
 
 from config.settings import Settings
-from core.adb_device import ADBDevice
 from data.capture_store import CaptureStore
+from gui.capture.network_utils import list_local_ipv4_addresses
 from integration.cert_asset_server import CACertAssetServer
 from utils.logger import logger
 
@@ -213,7 +213,7 @@ class HttpCaptureManager:
 
     @staticmethod
     def get_local_ip():
-        local_ips = ADBDevice.list_local_ipv4_addresses()
+        local_ips = list_local_ipv4_addresses()
         if local_ips:
             return local_ips[0]
         try:

@@ -98,20 +98,6 @@ def build_realtime_capture_page(editor):
     hero_layout.addLayout(badge_row)
     layout.addWidget(hero_card)
 
-    editor.protocol_summary_label = QLabel("当前尚未加载接口协议")
-    editor.protocol_summary_label.setWordWrap(True)
-    editor.protocol_summary_label.setObjectName("dataInfo")
-    editor.protocol_fields_label = QLabel("导出字段: -")
-    editor.protocol_fields_label.setWordWrap(True)
-    editor.protocol_fields_label.setObjectName("dataInfo")
-    editor.protocol_config_path_label = QLabel("协议文件: -")
-    editor.protocol_config_path_label.setWordWrap(True)
-    editor.protocol_config_path_label.setObjectName("dataInfo")
-
-    layout.addWidget(editor.protocol_summary_label)
-    layout.addWidget(editor.protocol_fields_label)
-    layout.addWidget(editor.protocol_config_path_label)
-
     editor.capture_table = QTableWidget(0, len(CaptureStore.COLUMNS))
     editor.capture_table.setHorizontalHeaderLabels([title for _, title in CaptureStore.COLUMNS])
     editor.capture_table.setSelectionBehavior(QAbstractItemView.SelectRows)

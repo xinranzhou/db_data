@@ -17,6 +17,7 @@ class IOSCaptureController:
 
         if hasattr(self.editor, "capture_android_proxy_checkbox"):
             self.editor.capture_android_proxy_checkbox.setEnabled(not state.is_ios)
+            self.editor.capture_android_proxy_checkbox.setVisible(not state.is_ios)
 
         if hasattr(self.editor, "capture_proxy_manual_hint_label"):
             self.editor.capture_proxy_manual_hint_label.setText(state.proxy_manual_hint_text)
@@ -52,6 +53,13 @@ class IOSCaptureController:
             "btn_clear_android_proxy",
             "btn_detect_android_proxy",
             "btn_test_proxy_connectivity",
+        ]:
+            if hasattr(self.editor, attr):
+                getattr(self.editor, attr).setVisible(not state.is_ios)
+
+        for attr in [
+            "capture_proxy_step_status",
+            "capture_device_proxy_summary_label",
         ]:
             if hasattr(self.editor, attr):
                 getattr(self.editor, attr).setVisible(not state.is_ios)

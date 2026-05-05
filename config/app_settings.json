@@ -23,7 +23,7 @@
     "asset_port": 8765,
     "patterns_text": "/wxmapi/wxsearch/search",
     "platform": "ios",
-    "android_proxy_auto_apply": true,
+    "android_proxy_auto_apply": false,
     "ios_proxy_manual": true,
     "max_body_kb": 512,
     "export_default_name": "captures.xlsx"
@@ -34,10 +34,10 @@
     "structured_export_name": "dianping_shop.xlsx"
   },
   "adb": {
-    "adb_path": "/Users/xinranzhou/Library/Android/sdk/platform-tools/adb",
-    "remote_address": "192.168.1.5:39983",
+    "adb_path": "",
+    "remote_address": "",
     "pair_address": "",
     "proxy_backup": "",
-    "last_applied_proxy": "192.168.1.7:8081"
+    "last_applied_proxy": ""
   }
 }

@@ -1,0 +1,82 @@
+name: Build Windows x64
+
+on:
+  push:
+    branches:
+      - release
+    tags:
+      - v*
+    paths:
+      - '**.py'
+      - 'requirements*.txt'
+      - 'build_app.py'
+      - 'bootstrap_build.py'
+      - 'build_release.sh'
+      - '.gitee/workflows/windows-x64.yml'
+      - 'node_editor_app.py'
+      - 'gui/**'
+      - 'integration/**'
+      - 'config/**'
+      - 'playright/**'
+      - 'login/**'
+      - 'utils/**'
+      - 'build_hooks/**'
+      - 'tools/**'
+      - 'icon.icns'
+      - 'icon.ico'
+      - 'icon.iconset/**'
+  pull_request:
+    branches:
+      - release
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout代码
+        uses: actions/checkout@v3
+
+      - name: 设置Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: 安装依赖
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: 构建Windows x64
+        run: |
+          python build_app.py --target windows-x64 --skip-installer
+
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-x64-build
+          path: |
+            dist/windows-x64/**
+          retention-days: 7
+
+      - name: 创建安装包
+        run: |
+          $exePath = "dist\windows-x64\DP采集器.exe"
+          $outputPath = "installer\windows-x64\DP采集器-Setup-x64.zip"
+          if (Test-Path $outputPath) { Remove-Item $outputPath }
+          Compress-Archive -Path "dist\windows-x64\*" -DestinationPath $outputPath
+
+      - name: 上传安装包
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-x64-installer
+          path: installer/windows-x64/*.zip
+          retention-days: 30
+
+      - name: 发布到Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: installer/windows-x64/*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

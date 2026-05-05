@@ -1,0 +1,150 @@
+# 说明:
+# 该文件与根目录 gitee.yml 保持同一并行构建策略，
+# 用于需要单独引用“全平台并行构建模板”时复用。
+
+name: release-parallel-build-template
+
+on:
+  push:
+    branches:
+      - release
+    tags:
+      - v*
+    paths:
+      - '**.py'
+      - 'requirements*.txt'
+      - 'build_app.py'
+      - 'bootstrap_build.py'
+      - 'build_release.sh'
+      - 'gitee.yml'
+      - 'gitee_build_all_platforms.yml'
+      - '.gitee.com/gitee.yml'
+      - 'node_editor_app.py'
+      - 'gui/**'
+      - 'integration/**'
+      - 'config/**'
+      - 'playright/**'
+      - 'login/**'
+      - 'utils/**'
+      - 'build_hooks/**'
+      - 'tools/**'
+      - 'icon.icns'
+      - 'icon.ico'
+      - 'icon.iconset/**'
+  merge_request:
+    target: release
+  pull_request:
+    branches:
+      - release
+
+stages:
+  - build-windows-x64
+  - build-macos-x64
+  - build-macos-arm64
+  - package-all
+  - notify
+
+variables:
+  PYTHON_VERSION: '3.9'
+
+build-windows-x64:
+  stage: build-windows-x64
+  script: |
+    python -m pip install --upgrade pip
+    pip install -r requirements.txt
+    pip install pyinstaller
+    python build_app.py --target windows-x64 --skip-installer
+    $zipName = "DP采集器-Windows-x64"
+    if ($env:CI_COMMIT_TAG) { $zipName = "$zipName-$env:CI_COMMIT_TAG" } else { $zipName = "$zipName-$env:CI_COMMIT_SHORT_SHA" }
+    $zipPath = "installer\windows-x64\$zipName.zip"
+    if (Test-Path $zipPath) { Remove-Item $zipPath }
+    Compress-Archive -Path "dist\windows-x64\*" -DestinationPath $zipPath
+  artifacts:
+    name: windows-x64
+    paths:
+      - 'dist/windows-x64/**/*'
+      - 'installer/windows-x64/*.zip'
+      - 'installer/windows-x64/*.iss'
+    expire_in: 30 days
+  only:
+    - release
+    - tags
+  tags:
+    - windows-latest
+
+build-macos-x64:
+  stage: build-macos-x64
+  script: |
+    pip3 install --upgrade pip
+    pip3 install -r requirements.txt
+    pip3 install pyinstaller
+    python3 build_app.py --target macos-x86_64 --skip-installer
+    DMG_NAME="DP采集器-macOS-x86_64"
+    if [ -n "$CI_COMMIT_TAG" ]; then DMG_NAME="$DMG_NAME-$CI_COMMIT_TAG"; else DMG_NAME="$DMG_NAME-$CI_COMMIT_SHORT_SHA"; fi
+    if command -v create-dmg >/dev/null 2>&1; then
+      create-dmg --volname "DP采集器-Intel" --window-pos 200 120 --window-size 640 420 --app-drop-link 440 200 "installer/macos-x86_64/${DMG_NAME}.dmg" "dist/macos-x86_64/DP采集器.app"
+    else
+      hdiutil create -volname "DP采集器-Intel" -srcfolder "dist/macos-x86_64/DP采集器.app" -ov -format UDZO "installer/macos-x86_64/${DMG_NAME}.dmg"
+    fi
+  artifacts:
+    name: macos-x64
+    paths:
+      - 'dist/macos-x86_64/**/*'
+      - 'installer/macos-x86_64/*.dmg'
+    expire_in: 30 days
+  only:
+    - release
+    - tags
+  tags:
+    - macos-latest
+
+build-macos-arm64:
+  stage: build-macos-arm64
+  script: |
+    pip3 install --upgrade pip
+    pip3 install -r requirements.txt
+    pip3 install pyinstaller
+    python3 build_app.py --target macos-arm64 --skip-installer
+    DMG_NAME="DP采集器-macOS-arm64"
+    if [ -n "$CI_COMMIT_TAG" ]; then DMG_NAME="$DMG_NAME-$CI_COMMIT_TAG"; else DMG_NAME="$DMG_NAME-$CI_COMMIT_SHORT_SHA"; fi
+    if command -v create-dmg >/dev/null 2>&1; then
+      create-dmg --volname "DP采集器-Silicon" --window-pos 200 120 --window-size 640 420 --app-drop-link 440 200 "installer/macos-arm64/${DMG_NAME}.dmg" "dist/macos-arm64/DP采集器.app"
+    else
+      hdiutil create -volname "DP采集器-Silicon" -srcfolder "dist/macos-arm64/DP采集器.app" -ov -format UDZO "installer/macos-arm64/${DMG_NAME}.dmg"
+    fi
+  artifacts:
+    name: macos-arm64
+    paths:
+      - 'dist/macos-arm64/**/*'
+      - 'installer/macos-arm64/*.dmg'
+    expire_in: 30 days
+  only:
+    - release
+    - tags
+  tags:
+    - macos-silicon
+
+package-all:
+  stage: package-all
+  script: |
+    mkdir -p release-packages
+    cp installer/windows-x64/*.zip release-packages/ 2>/dev/null || true
+    cp installer/macos-x86_64/*.dmg release-packages/ 2>/dev/null || true
+    cp installer/macos-arm64/*.dmg release-packages/ 2>/dev/null || true
+    ls -lh release-packages/ || true
+  artifacts:
+    name: all-platforms
+    paths:
+      - 'release-packages/**/*'
+    expire_in: 30 days
+  only:
+    - release
+    - tags
+
+notify:
+  stage: notify
+  script: |
+    echo "并行构建完成: Windows x64 / macOS x86_64 / macOS arm64"
+  only:
+    - release
+    - tags
