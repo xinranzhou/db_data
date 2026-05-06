@@ -70,9 +70,9 @@ data/*
 !data/capture_assets/.gitkeep
 !data/playright/
 !data/playright/.gitkeep
-!data/playright/runs/
+data/playright/runs/*
 !data/playright/runs/.gitkeep
-!data/playright/browser_profile/
+data/playright/browser_profile/*
 !data/playright/browser_profile/.gitkeep
 *.csv
 *.json.bak
