@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import sys
 
 from PyQt5.QtCore import Qt, QThread, QTimer, pyqtSignal
 from PyQt5.QtWidgets import (
@@ -67,10 +68,10 @@ class PlaywrightBatchWorker(QThread):
         try:
             store = CaptureStore(db_path=self.db_path)
             dataset = StructuredShopDataset(store)
-            result_base_dir = Settings.DATA_DIR / "playright"
+            result_base_dir = Settings.PLAYRIGHT_DIR
             result_base_dir.mkdir(parents=True, exist_ok=True)
-            user_data_dir = result_base_dir / "browser_profile"
-            run_paths = build_run_output_paths(result_base_dir)
+            user_data_dir = Settings.PLAYRIGHT_BROWSER_PROFILE_DIR
+            run_paths = build_run_output_paths(Settings.PLAYRIGHT_RUNS_DIR)
             runner = AsyncPlaywrightBatchRunner(
                 dataset=dataset,
                 user_data_dir=user_data_dir,
@@ -91,6 +92,29 @@ class PlaywrightBatchWorker(QThread):
 
     def _emit_progress(self, message: str):
         self.progress.emit(message)
+
+
+class PackageInstallWorker(QThread):
+    completed = pyqtSignal(bool, str)
+
+    def __init__(self, command: list[str], success_message: str, parent=None):
+        super().__init__(parent)
+        self.command = command
+        self.success_message = success_message
+
+    def run(self):
+        try:
+            result = __import__("subprocess").run(
+                self.command,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            detail = (result.stdout or "").strip()
+            message = self.success_message if not detail else f"{self.success_message}\n\n{detail}"
+            self.completed.emit(True, message)
+        except Exception as exc:
+            self.completed.emit(False, str(exc))
 
 
 class LoginWindow(QWidget):
@@ -296,6 +320,7 @@ class CaptureOnlyApp(QMainWindow):
         self.structured_total_records = 0
         self.structured_table_updating = False
         self.playwright_worker = None
+        self.package_install_worker = None
 
         self.ios_capture_controller = IOSCaptureController(self)
         self.capture_certificate_controller = CaptureCertificateController(self, qrcode_module=qrcode)
@@ -755,8 +780,20 @@ class CaptureOnlyApp(QMainWindow):
         self._refresh_capture_status()
         if success:
             self.statusBar().showMessage(message, 4000)
+            QTimer.singleShot(1500, self._refresh_capture_status)
         else:
-            QMessageBox.warning(self, "抓取服务", message)
+            if "mitmdump" in message and not getattr(sys, "frozen", False):
+                reply = QMessageBox.question(
+                    self,
+                    "抓取服务",
+                    f"{message}\n\n是否立即在当前 Python 环境安装 mitmproxy？\n\n{sys.executable} -m pip install mitmproxy",
+                    QMessageBox.Yes | QMessageBox.No,
+                    QMessageBox.Yes,
+                )
+                if reply == QMessageBox.Yes:
+                    self._install_mitmproxy_runtime()
+            else:
+                QMessageBox.warning(self, "抓取服务", message)
 
     def _stop_proxy_capture_only(self):
         _, capture_message = self.capture_manager.stop()
@@ -824,6 +861,46 @@ class CaptureOnlyApp(QMainWindow):
 
     def _start_playwright_phone_fetch(self):
         self.structured_data_controller.start_playwright_phone_fetch()
+
+    def _install_playwright_runtime(self):
+        self._run_package_install(
+            command=[sys.executable, "-m", "playwright", "install", "chromium"],
+            success_message="浏览器运行时安装完成。",
+            title="安装浏览器运行时",
+        )
+
+    def _install_mitmproxy_runtime(self):
+        if getattr(sys, "frozen", False):
+            QMessageBox.information(
+                self,
+                "安装 mitmproxy",
+                "正式打包版不再通过应用内执行 pip 安装 mitmproxy。\n\n请直接使用包内抓包组件；如果仍提示缺失，请重新打包或重新安装当前应用。",
+            )
+            return
+        self._run_package_install(
+            command=[sys.executable, "-m", "pip", "install", "mitmproxy"],
+            success_message="mitmproxy 安装完成。",
+            title="安装 mitmproxy",
+        )
+
+    def _run_package_install(self, command: list[str], success_message: str, title: str):
+        if self.package_install_worker and self.package_install_worker.isRunning():
+            QMessageBox.information(self, title, "已有安装任务正在执行，请稍候。")
+            return
+
+        self.statusBar().showMessage(f"{title}中...", 0)
+        self.package_install_worker = PackageInstallWorker(command, success_message, self)
+        self.package_install_worker.completed.connect(lambda ok, message: self._handle_package_install_completed(title, ok, message))
+        self.package_install_worker.start()
+
+    def _handle_package_install_completed(self, title: str, success: bool, message: str):
+        self.package_install_worker = None
+        self.statusBar().clearMessage()
+        if success:
+            QMessageBox.information(self, title, message)
+            self._refresh_capture_status()
+        else:
+            QMessageBox.warning(self, title, message)
 
     def _import_structured_records(self):
         self.realtime_capture_controller.import_structured_records()

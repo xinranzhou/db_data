@@ -4,22 +4,35 @@ mitmproxy 抓取插件
 """
 
 import json
+import os
 import re
 from datetime import datetime
 from pathlib import Path
 
 
-RUNTIME_PATH = Path(__file__).resolve().parent.parent / "data" / "capture_runtime.json"
+def _resolve_runtime_path() -> Path:
+    configured = os.getenv("DP_CAPTURE_RUNTIME_PATH", "").strip()
+    if configured:
+        return Path(configured)
+    return Path(__file__).resolve().parent.parent / "data" / "capture_runtime.json"
+
+
+RUNTIME_PATH = _resolve_runtime_path()
+
+
+def _default_runtime():
+    inbox_default = RUNTIME_PATH.parent / "capture_inbox.jsonl"
+    return {
+        "patterns": [],
+        "inbox_path": str(inbox_default),
+        "platform": "ios",
+        "max_body_kb": 512,
+    }
 
 
 def _load_runtime():
     if not RUNTIME_PATH.exists():
-        return {
-            "patterns": [],
-            "inbox_path": str(Path(__file__).resolve().parent.parent / "data" / "capture_inbox.jsonl"),
-            "platform": "android",
-            "max_body_kb": 512,
-        }
+        return _default_runtime()
 
     with open(RUNTIME_PATH, "r", encoding="utf-8") as file:
         return json.load(file)
@@ -28,6 +41,7 @@ def _load_runtime():
 class MatchRecorder:
     def __init__(self):
         self._runtime_mtime = None
+        self._startup_logged = False
         self.reload_runtime()
 
     def reload_runtime(self):
@@ -43,10 +57,17 @@ class MatchRecorder:
                 self.patterns.append(re.compile(pattern))
             except re.error:
                 continue
-        self.inbox_path = Path(runtime.get("inbox_path"))
+        self.inbox_path = Path(runtime.get("inbox_path") or (_default_runtime()["inbox_path"]))
         self.inbox_path.parent.mkdir(parents=True, exist_ok=True)
-        self.platform = runtime.get("platform", "android")
+        self.platform = runtime.get("platform", "ios")
         self.max_body_bytes = int(runtime.get("max_body_kb", 512) or 512) * 1024
+        if not self._startup_logged:
+            print(
+                "[capture-addon] runtime_path=%s inbox_path=%s platform=%s patterns=%s"
+                % (RUNTIME_PATH, self.inbox_path, self.platform, len(self.patterns)),
+                flush=True,
+            )
+            self._startup_logged = True
 
     def refresh_runtime_if_needed(self):
         try:

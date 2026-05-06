@@ -40,6 +40,7 @@ permissions:
 
 env:
   PYTHON_VERSION: "3.11"
+  PLAYWRIGHT_BROWSERS_PATH: tools/playwright-browsers
 
 jobs:
   build:
@@ -139,6 +140,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pyinstaller
+          python -m playwright install chromium
 
       - name: Install Dependencies on macOS
         if: matrix.target != 'windows-x64'
@@ -147,6 +149,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pyinstaller
+          python -m playwright install chromium
 
       - name: Build App on Windows
         if: matrix.target == 'windows-x64'

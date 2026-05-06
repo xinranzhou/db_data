@@ -12,17 +12,17 @@ class RealtimeCaptureController:
 
     def show_data_operation_help(self):
         platform_value = self.editor._get_capture_platform()
-        ios_extra = ""
+        step_three_text = "3. 点击“开始收集数据”拉取最新抓包数据\n"
         if platform_value == "ios":
-            ios_extra = "3. iOS 模式下，请先在 iPhone 手动打开目标页面/小程序，再回到这里开始收集数据\n"
+            step_three_text = "3. iOS 模式下，请先在 iPhone 手动打开目标页面/小程序，再回到这里开始收集数据\n"
         elif platform_value == "both":
-            ios_extra = "3. 双平台模式下，请先在目标设备上触发请求，再回到这里开始收集数据\n"
+            step_three_text = "3. 双平台模式下，请先在目标设备上触发请求，再回到这里开始收集数据\n"
         QMessageBox.information(
             self.editor,
             "抓取实时数据说明",
             "1. 先在“抓包配置”页启动抓取服务\n"
             "2. 在这里选择点评接口\n"
-            f"{ios_extra if ios_extra else '3. 点击“开始收集数据”拉取最新抓包数据\\n'}"
+            f"{step_three_text}"
             "4. 点击“录入抓取数据”时，只会按当前选中的接口协议执行转换\n"
             "5. “导出原始抓包”导出抓包明细，用于排查解析问题\n"
             "6. “清理临时抓包”会清空实时抓包明细和临时 inbox 数据\n"

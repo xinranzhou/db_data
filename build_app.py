@@ -174,13 +174,144 @@ def ensure_output_dirs(target: BuildTarget) -> dict[str, Path]:
 
 
 def get_data_dirs() -> list[Path]:
-    names = ["config", "tools"]
+    names = ["config", "integration"]
     result = []
     for name in names:
         path = BASE_DIR / name
         if path.exists():
             result.append(path)
     return result
+
+
+def get_data_files() -> list[tuple[Path, str]]:
+    files: list[tuple[Path, str]] = []
+
+    for relative_path in [
+        Path("data") / "capture_store.py",
+        Path("data") / "structured_capture.py",
+    ]:
+        source_path = BASE_DIR / relative_path
+        if source_path.exists():
+            files.append((source_path, str(relative_path.parent)))
+
+    for relative_path in [
+        Path("data") / ".gitkeep",
+        Path("data") / "capture_assets" / ".gitkeep",
+        Path("data") / "playright" / ".gitkeep",
+        Path("data") / "playright" / "runs" / ".gitkeep",
+        Path("data") / "playright" / "browser_profile" / ".gitkeep",
+    ]:
+        source_path = BASE_DIR / relative_path
+        if source_path.exists():
+            files.append((source_path, str(relative_path.parent)))
+
+    return files
+
+
+def build_mitmdump_helper_command(target: BuildTarget, paths: dict[str, Path]) -> list[str]:
+    helper_name = "mitmdump-helper"
+    cmd = [
+        sys.executable,
+        "-m",
+        "PyInstaller",
+        "--name",
+        helper_name,
+        "--clean",
+        "--noconfirm",
+        "--distpath",
+        str(paths["dist"]),
+        "--workpath",
+        str(paths["work"] / "mitmdump-helper"),
+        "--specpath",
+        str(paths["spec"]),
+    ]
+
+    cmd.append("--onefile")
+
+    if target.pyinstaller_target_arch:
+        cmd.extend(["--target-arch", target.pyinstaller_target_arch])
+
+    cmd.extend(["--collect-all", "mitmproxy"])
+    cmd.append("mitmdump_helper_app.py")
+    return cmd
+
+
+def copy_runtime_support_dirs(target: BuildTarget, paths: dict[str, Path]):
+    artifact = resolve_build_artifact(target, paths)
+    if target.bundle_mode == "onefile":
+        return
+
+    if target.os_name == "macos":
+        runtime_root = artifact / "Contents" / "Resources"
+    else:
+        runtime_root = artifact
+
+    tools_src = BASE_DIR / "tools"
+    tools_dest = runtime_root / "tools"
+
+    if tools_dest.exists():
+        shutil.rmtree(tools_dest)
+    tools_dest.mkdir(parents=True, exist_ok=True)
+
+    keep_files = [".gitkeep"]
+    for name in keep_files:
+        source = tools_src / name
+        if source.exists():
+            shutil.copy2(source, tools_dest / name)
+
+
+def build_mitmdump_helper(target: BuildTarget, paths: dict[str, Path]) -> Path:
+    print(f"Building mitmdump helper for {target.key}...")
+    cmd = build_mitmdump_helper_command(target, paths)
+    print("Command:", " ".join(cmd))
+    env = os.environ.copy()
+    env["PYINSTALLER_CONFIG_DIR"] = str(paths["cache"])
+    subprocess.run(cmd, check=True, cwd=str(BASE_DIR), env=env)
+
+    helper_artifact = paths["dist"] / ("mitmdump-helper.exe" if target.os_name == "windows" else "mitmdump-helper")
+
+    if not helper_artifact.exists():
+        raise RuntimeError(f"mitmdump helper artifact missing: {helper_artifact}")
+    return helper_artifact
+
+
+def install_mitmdump_helper_into_bundle(target: BuildTarget, paths: dict[str, Path], helper_artifact: Path):
+    artifact = resolve_build_artifact(target, paths)
+    if target.bundle_mode == "onefile":
+        return
+
+    destinations: list[Path]
+    if target.os_name == "macos":
+        destinations = [
+            artifact / "Contents" / "Frameworks" / "tools" / "bin",
+            artifact / "Contents" / "Resources" / "tools" / "bin",
+        ]
+    else:
+        destinations = [artifact / "tools" / "bin"]
+
+    filename = "mitmdump-helper.exe" if target.os_name == "windows" else "mitmdump-helper"
+    for tools_bin_dir in destinations:
+        tools_bin_dir.mkdir(parents=True, exist_ok=True)
+        destination = tools_bin_dir / filename
+        shutil.copy2(helper_artifact, destination)
+        destination.chmod(0o755)
+
+
+def resign_macos_bundle_if_needed(target: BuildTarget, paths: dict[str, Path]):
+    if target.os_name != "macos" or target.bundle_mode == "onefile":
+        return
+
+    artifact = resolve_build_artifact(target, paths)
+    cmd = [
+        "codesign",
+        "--force",
+        "--deep",
+        "--sign",
+        "-",
+        str(artifact),
+    ]
+    print("Command:", " ".join(cmd))
+    subprocess.run(cmd, check=True, cwd=str(BASE_DIR))
 
 
 def build_pyinstaller_command(target: BuildTarget, paths: dict[str, Path]) -> list[str]:
@@ -220,6 +351,9 @@ def build_pyinstaller_command(target: BuildTarget, paths: dict[str, Path]) -> li
     for data_dir in get_data_dirs():
         cmd.extend(["--add-data", f"{data_dir.resolve()}{os.pathsep}{data_dir.name}"])
 
+    for data_file, target_dir in get_data_files():
+        cmd.extend(["--add-data", f"{data_file.resolve()}{os.pathsep}{target_dir}"])
+
     hidden_imports = [
         "PyQt5.QtCore",
         "PyQt5.QtGui",
@@ -231,9 +365,31 @@ def build_pyinstaller_command(target: BuildTarget, paths: dict[str, Path]) -> li
         "openpyxl",
         "playwright",
         "tenacity",
+        "sqlite3",
+        "data.capture_store",
+        "data.structured_capture",
+        "gui.capture",
+        "gui.capture.ca_certificate_controller",
+        "gui.capture.capture_only_window",
+        "gui.capture.capture_settings_panel",
+        "gui.capture.data_management_panel",
+        "gui.capture.ios_capture_controller",
+        "gui.capture.network_utils",
+        "gui.capture.platform_state",
+        "gui.capture.realtime_capture_controller",
+        "gui.capture.realtime_capture_panel",
+        "gui.capture.structured_data_controller",
     ]
     for module in hidden_imports:
         cmd.extend(["--hidden-import", module])
+
+    collect_all_modules = [
+        "gui",
+        "playright",
+        "playwright",
+    ]
+    for module in collect_all_modules:
+        cmd.extend(["--collect-all", module])
 
     cmd.append("node_editor_app.py")
     return cmd
@@ -247,15 +403,35 @@ def build_app(target: BuildTarget, paths: dict[str, Path]):
     env["PYINSTALLER_CONFIG_DIR"] = str(paths["cache"])
     subprocess.run(cmd, check=True, cwd=str(BASE_DIR), env=env)
 
-    artifact = paths["dist"] / target.executable_name
+    artifact = resolve_build_artifact(target, paths)
     if not artifact.exists():
         raise RuntimeError(f"PyInstaller finished but expected artifact is missing: {artifact}")
 
+    copy_runtime_support_dirs(target, paths)
     print(f"Build completed: {artifact}")
 
 
+def resolve_build_artifact(target: BuildTarget, paths: dict[str, Path]) -> Path:
+    direct_path = paths["dist"] / target.executable_name
+    if direct_path.exists():
+        return direct_path
+
+    if target.os_name == "macos":
+        app_bundle = paths["dist"] / f"{APP_NAME}.app"
+        if app_bundle.exists():
+            return app_bundle
+
+        app_dir = paths["dist"] / APP_NAME
+        if app_dir.exists():
+            return app_dir
+
+    raise RuntimeError(
+        f"PyInstaller finished but no known artifact was found under {paths['dist']} for target {target.key}"
+    )
+
+
 def create_windows_installer(target: BuildTarget, paths: dict[str, Path]) -> Path:
-    artifact = paths["dist"] / target.executable_name
+    artifact = resolve_build_artifact(target, paths)
     output_name = f"{APP_NAME}-Setup-{target.key}"
     iss_path = paths["installer"] / f"{APP_NAME}-{target.key}.iss"
     architecture_lines = []
@@ -296,7 +472,7 @@ Name: "{{commondesktop}}\\{APP_DISPLAY_NAME}"; Filename: "{{app}}\\{APP_NAME}.ex
 
 
 def create_macos_installer(target: BuildTarget, paths: dict[str, Path]) -> Path:
-    artifact = paths["dist"] / target.executable_name
+    artifact = resolve_build_artifact(target, paths)
     dmg_path = paths["installer"] / f"{APP_NAME}-{target.key}.dmg"
 
     create_dmg = shutil.which("create-dmg")
@@ -389,6 +565,9 @@ def main():
             install_pyinstaller()
 
         build_app(target, paths)
+        helper_artifact = build_mitmdump_helper(target, paths)
+        install_mitmdump_helper_into_bundle(target, paths, helper_artifact)
+        resign_macos_bundle_if_needed(target, paths)
 
         if not args.skip_installer:
             create_installer(target, paths)

@@ -18,9 +18,12 @@ else {
 
 $PythonCmd = $null
 $PythonArgs = @()
-if (Get-Command py -ErrorAction SilentlyContinue) {
+if (Get-Command python3.11 -ErrorAction SilentlyContinue) {
+    $PythonCmd = "python3.11"
+}
+elseif (Get-Command py -ErrorAction SilentlyContinue) {
     $PythonCmd = "py"
-    $PythonArgs = @("-3")
+    $PythonArgs = @("-3.11")
 }
 elseif (Get-Command python -ErrorAction SilentlyContinue) {
     $PythonCmd = "python"
@@ -30,10 +33,10 @@ if (-not $PythonCmd) {
     Write-Error "未找到 Python，请先安装 Python 3.11+。"
 }
 
-& $PythonCmd @PythonArgs -c "import sys; raise SystemExit(0 if sys.version_info >= (3, 11) else 1)" 2>$null
+& $PythonCmd @PythonArgs -c "import sys; raise SystemExit(0 if sys.version_info[:2] == (3, 11) else 1)" 2>$null
 if ($LASTEXITCODE -ne 0) {
     $VersionText = & $PythonCmd @PythonArgs --version 2>&1
-    Write-Error "Python 版本过低: $VersionText。构建环境需要 Python 3.11+。"
+    Write-Error "Python 版本不受支持: $VersionText。当前本地构建固定使用 Python 3.11.x。"
 }
 
 $VersionText = & $PythonCmd @PythonArgs --version 2>&1

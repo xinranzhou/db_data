@@ -3,10 +3,11 @@
 
 import logging
 import sys
-from pathlib import Path
 
-log_dir = Path(__file__).parent.parent / "logs"
-log_dir.mkdir(exist_ok=True)
+from config.settings import Settings
+
+log_dir = Settings.LOG_DIR
+log_dir.mkdir(parents=True, exist_ok=True)
 
 try:
     from loguru import logger

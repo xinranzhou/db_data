@@ -2,7 +2,7 @@
 
 ## 运行环境
 
-- Python `3.11+`
+- Python `3.11.x`
 - Windows `10/11 x64`
 - macOS `10.14+`
 - 项目运行依赖 `PyQt5`、`mitmproxy`、`playwright`
@@ -14,6 +14,8 @@
   - `macos-x86_64`
   - `windows-x64`
 - Linux 目前只建议源码运行，不在 `build_app.py` 官方打包目标内。
+- 本地打包当前固定使用 `Python 3.11.x`，不要使用 `Python 3.12+ / 3.13+`。
+- `mitmproxy` 需要安装到当前可执行 Python 环境；应用内已提供一键安装入口。
 
 ---
 
@@ -29,7 +31,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-如果需要 Playwright 自带浏览器，再额外执行：
+为保证详情补抓稳定可用，建议继续安装 Playwright Chromium：
 
 ```bash
 python -m playwright install chromium
@@ -107,6 +109,7 @@ python3 bootstrap_build.py
 - 识别当前机器对应的打包目标
 - 创建独立构建虚拟环境
 - 安装依赖和 `pyinstaller`
+- 安装 Playwright Chromium 到项目内 `tools/playwright-browsers/`
 - macOS 下按需安装 `create-dmg`
 - 调用 `build_app.py` 完成正式打包
 
@@ -204,6 +207,7 @@ python3 build_app.py --target macos-arm64 --skip-pyinstaller-install
 
 - `icon.icns` 或 `icon.ico` 不存在时，脚本会给出 warning 并跳过图标设置
 - `config`、`templates`、`tools` 目录存在时会自动打入产物
+- `tools/playwright-browsers/` 只作为本地源码/构建缓存，不进入正式安装包
 - `images/` 当前不会自动打入包内，如后续运行依赖该目录，需要再补进打包脚本
 - macOS 和 Windows 需要各自在本机目标系统上构建，不建议混用产物
 

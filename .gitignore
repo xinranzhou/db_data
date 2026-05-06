@@ -7,6 +7,8 @@ __pycache__/
 venv/
 env/
 ENV/
+.venv/
+.build-venvs/
 *.egg-info/
 dist/
 build/
@@ -22,6 +24,7 @@ config/cache.json
 *.temp
 /tmp/
 .matplotlib/
+archive/
 
 # IDE
 .vscode/
@@ -55,11 +58,36 @@ installer/
 *.app
 *.exe
 *.msi
+release-packages/
 
 # 数据文件
-data/
+data/*
+!data/.gitkeep
+!data/__init__.py
+!data/capture_store.py
+!data/structured_capture.py
+!data/capture_assets/
+!data/capture_assets/.gitkeep
+!data/playright/
+!data/playright/.gitkeep
+!data/playright/runs/
+!data/playright/runs/.gitkeep
+!data/playright/browser_profile/
+!data/playright/browser_profile/.gitkeep
 *.csv
 *.json.bak
+*.db
+*.sqlite
+*.sqlite3
+*.xlsx
+
+# Playwright 浏览器与运行缓存
+tools/*
+!tools/.gitkeep
+tools/playwright-browsers/
+playwright-report/
+test-results/
+*.har
 
 # 测试文件
 test_*.jpg

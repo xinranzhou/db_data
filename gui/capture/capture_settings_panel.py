@@ -98,6 +98,10 @@ def build_capture_settings_page(editor):
     step1_actions = QHBoxLayout()
     btn_start_capture_quick = QPushButton("启动抓取服务")
     btn_start_capture_quick.clicked.connect(editor._start_capture_service)
+    btn_install_mitmproxy = QPushButton("安装 mitmproxy")
+    btn_install_mitmproxy.clicked.connect(editor._install_mitmproxy_runtime)
+    if hasattr(__import__("sys"), "frozen") and __import__("sys").frozen:
+        btn_install_mitmproxy.setText("检查抓包组件")
     btn_stop_bundle_quick = QPushButton("一键停止抓包")
     btn_stop_bundle_quick.clicked.connect(editor._stop_proxy_capture_only)
     btn_stop_bundle_clear_quick = QPushButton("停止抓包并清除手机代理")
@@ -105,6 +109,7 @@ def build_capture_settings_page(editor):
     btn_refresh_capture_quick = QPushButton("刷新状态")
     btn_refresh_capture_quick.clicked.connect(editor._refresh_capture_status)
     step1_actions.addWidget(btn_start_capture_quick)
+    step1_actions.addWidget(btn_install_mitmproxy)
     step1_actions.addWidget(btn_stop_bundle_quick)
     step1_actions.addWidget(btn_stop_bundle_clear_quick)
     step1_actions.addWidget(btn_refresh_capture_quick)

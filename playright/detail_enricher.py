@@ -982,6 +982,11 @@ def resolve_browser_launch_options(browser_path: Path | str | None = None, brows
         logger.info(f"使用用户指定浏览器: {resolved}")
         return {"executable_path": str(resolved)}
 
+    bundled_browser = detect_bundled_playwright_chromium()
+    if bundled_browser:
+        logger.info(f"使用随包 Chromium 浏览器: {bundled_browser}")
+        return {"executable_path": str(bundled_browser)}
+
     if browser_channel and browser_channel != "auto":
         logger.info(f"使用指定浏览器 channel: {browser_channel}")
         return {"channel": browser_channel}
@@ -991,7 +996,7 @@ def resolve_browser_launch_options(browser_path: Path | str | None = None, brows
         logger.info(f"使用本机 Chromium 浏览器: {detected}")
         return {"executable_path": str(detected)}
 
-    logger.warning("未探测到本机 Chrome/Chromium，将回退到 Playwright 默认 Chromium")
+    logger.warning("未探测到本机 Chrome/Chromium，将回退到 Playwright 默认 Chromium；若打包产物未内置浏览器，请先安装系统 Chrome 或在源码环境执行 playwright install chromium")
     return {}
 
 
@@ -1600,6 +1605,28 @@ def _browser_candidates_for_system(system_name: str) -> list[str]:
         "/usr/bin/chromium-browser",
         "/snap/bin/chromium",
     ]
+
+
+def detect_bundled_playwright_chromium() -> Path | None:
+    base_dir = Settings.PLAYWRIGHT_BROWSERS_DIR
+    if not base_dir.exists():
+        return None
+
+    candidate_names_by_system = {
+        "darwin": ["Chromium.app/Contents/MacOS/Chromium", "chrome-mac/Chromium.app/Contents/MacOS/Chromium"],
+        "windows": ["chrome-win/chrome.exe", "chrome-win64/chrome.exe", "chrome-win32/chrome.exe"],
+        "linux": ["chrome-linux/chrome"],
+    }
+
+    system_name = platform.system().lower()
+    relative_candidates = candidate_names_by_system.get(system_name, [])
+    for chromium_dir in sorted(base_dir.glob("chromium-*")):
+        for relative in relative_candidates:
+            candidate = chromium_dir / relative
+            if candidate.exists():
+                return candidate
+
+    return None
 
 
 def load_mock_records(mock_data_path: Path | str = DEFAULT_MOCK_DATA_FILE) -> list[dict]:

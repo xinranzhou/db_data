@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import shutil
 import subprocess
 import sys
@@ -82,13 +83,70 @@ def ensure_build_venv(venv_dir: Path, python_cmd: str) -> Path:
     if not venv_python.exists():
         raise RuntimeError(f"Build virtualenv is missing python: {venv_python}")
 
+    result = subprocess.run(
+        [str(venv_python), "-c", "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')"],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    current_venv_version = result.stdout.strip()
+
+    requested_result = subprocess.run(
+        [str(python_path), "-c", "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')"],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    requested_version = requested_result.stdout.strip()
+
+    if current_venv_version != requested_version:
+        print(
+            f"Recreating build venv {venv_dir} because python version changed: "
+            f"{current_venv_version} -> {requested_version}"
+        )
+        shutil.rmtree(venv_dir)
+        run([str(python_path), "-m", "venv", str(venv_dir)])
+
+        if sys.platform == "win32":
+            venv_python = venv_dir / "Scripts" / "python.exe"
+        else:
+            venv_python = venv_dir / "bin" / "python"
+
+        if not venv_python.exists():
+            raise RuntimeError(f"Build virtualenv is missing python after recreate: {venv_python}")
+
     return venv_python
+
+
+def ensure_supported_build_python(python_path: Path):
+    result = subprocess.run(
+        [str(python_path), "-c", "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}')"],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    version_text = result.stdout.strip()
+    major, minor, _patch = [int(part) for part in version_text.split(".")]
+    if (major, minor) != (3, 11):
+        raise RuntimeError(
+            f"当前构建 Python 为 {version_text}，本项目本地打包当前只支持 Python 3.11.x。"
+        )
 
 
 def install_build_dependencies(venv_python: Path):
     run([str(venv_python), "-m", "pip", "install", "--upgrade", "pip"])
     run([str(venv_python), "-m", "pip", "install", "-r", "requirements.txt"])
     run([str(venv_python), "-m", "pip", "install", "pyinstaller"])
+    browsers_dir = build_app.BASE_DIR / "tools" / "playwright-browsers"
+    browsers_dir.mkdir(parents=True, exist_ok=True)
+    env = {**os.environ, "PLAYWRIGHT_BROWSERS_PATH": str(browsers_dir)}
+    print(f"Using PLAYWRIGHT_BROWSERS_PATH={browsers_dir}")
+    subprocess.run(
+        [str(venv_python), "-m", "playwright", "install", "chromium"],
+        check=True,
+        cwd=str(BASE_DIR),
+        env=env,
+    )
 
 
 def ensure_create_dmg():
@@ -119,6 +177,7 @@ def main():
     print("=" * 60)
 
     venv_python = ensure_build_venv(venv_dir, python_cmd)
+    ensure_supported_build_python(venv_python)
 
     if not args.skip_deps:
         install_build_dependencies(venv_python)
