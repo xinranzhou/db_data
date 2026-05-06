@@ -1,23 +1,30 @@
 #!/bin/bash
-# 一键安装启动脚本 (macOS/Linux)
+# 源码环境一键安装脚本 (macOS/Linux)
 
 echo "=================================="
-echo "DP采集器 - 一键安装"
+echo "DP采集器 - 源码环境安装"
 echo "=================================="
 echo ""
 
 # 检查 Python
-if ! command -v python3 &> /dev/null; then
+PYTHON_CMD=""
+if command -v python3.11 >/dev/null 2>&1; then
+    PYTHON_CMD="python3.11"
+elif command -v python3 >/dev/null 2>&1; then
+    PYTHON_CMD="python3"
+fi
+
+if [ -z "$PYTHON_CMD" ]; then
     echo "❌ 未找到 Python 3"
-    echo "请先安装 Python 3.8+: https://www.python.org/downloads/"
+    echo "请先安装 Python 3.11.x: https://www.python.org/downloads/"
     exit 1
 fi
 
-echo "✅ 找到 Python: $(python3 --version)"
+echo "✅ 找到 Python: $($PYTHON_CMD --version)"
 echo ""
 
 # 运行安装脚本
-python3 install.py
+"$PYTHON_CMD" install.py
 
 echo ""
 echo "按任意键退出..."

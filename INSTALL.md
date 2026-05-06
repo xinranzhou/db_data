@@ -15,7 +15,8 @@
   - `windows-x64`
 - Linux 目前只建议源码运行，不在 `build_app.py` 官方打包目标内。
 - 本地打包当前固定使用 `Python 3.11.x`，不要使用 `Python 3.12+ / 3.13+`。
-- `mitmproxy` 需要安装到当前可执行 Python 环境；应用内已提供一键安装入口。
+- 正式打包产物会内置 `mitmdump-helper`，正常运行不依赖系统级 `mitmproxy`。
+- 源码运行时仍需通过 `requirements.txt` 安装 `mitmproxy` Python 包。
 
 ---
 
@@ -43,10 +44,15 @@ python -m playwright install chromium
 python node_editor_app.py
 ```
 
-### 3. 一键安装脚本
+### 3. 安装辅助脚本
 
 - Windows：双击 `install.bat`
 - macOS / Linux：执行 `./install.sh`
+
+说明：
+
+- 这两个脚本只负责创建本地 `venv`、安装依赖并提示后续启动方式。
+- 正式打包不要走这里，统一使用 `build_release.sh` / `build_release.ps1` / `bootstrap_build.py`。
 
 ---
 
@@ -86,7 +92,7 @@ python node_editor_app.py
 
 如果是在目标机构建，推荐直接运行统一 bootstrap 脚本：
 
-macOS / Linux:
+macOS:
 
 ```bash
 ./build_release.sh
@@ -101,7 +107,7 @@ Windows PowerShell:
 或直接：
 
 ```bash
-python3 bootstrap_build.py
+python3.11 bootstrap_build.py
 ```
 
 它会自动：
@@ -220,8 +226,8 @@ python3 build_app.py --target macos-arm64 --skip-pyinstaller-install
 适合内部开发或调试：
 
 1. 分发整个项目目录
-2. 使用 `install.bat` 或 `install.sh`
-3. 首次启动后在登录页输入账号密码
+2. 使用 `install.bat` 或 `install.sh` 安装源码运行依赖
+3. 执行 `python node_editor_app.py`
 
 ### 方式 2：打包分发
 

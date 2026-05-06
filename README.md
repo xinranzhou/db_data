@@ -57,7 +57,8 @@ pip install -r requirements.txt
   - `opencv-python`
   - `numpy`
   - `pyautogui`
-- `mitmproxy` 需要安装到当前可执行 Python 环境；应用内已提供一键安装入口。
+- 正式打包产物会内置 `mitmdump-helper`，正常运行不依赖系统级 `mitmproxy`。
+- 源码运行时仍需通过 `requirements.txt` 安装 `mitmproxy` Python 包。
 - 为保证详情补抓稳定可用，建议本地也安装 Playwright Chromium：
 
 ```bash
@@ -207,9 +208,9 @@ cd /Users/xinranzhou/Documents/zft/auto_ocr/py_test
 
 推荐本地正式构建入口：
 
-- macOS / Linux：`./build_release.sh`
+- macOS：`./build_release.sh`
 - Windows PowerShell：`.\build_release.ps1`
-- 或直接：`python3 bootstrap_build.py`
+- 或直接：`python3.11 bootstrap_build.py`
 
 统一构建入口会自动：
 
@@ -228,6 +229,8 @@ cd /Users/xinranzhou/Documents/zft/auto_ocr/py_test
 - 本地如果当前默认 `python3` 是 `3.13`，请显式改用 `python3.11` 再执行构建。
 - 如果之前已经用别的 Python 版本创建过 `.build-venvs/`，构建脚本会自动重建对应虚拟环境。
 - 发布产物当前不再内置 Playwright Chromium，避免安装包体积失控。
+- 新机器拉代码后，`data/` 与 `tools/` 只需要仓库里的骨架文件即可，运行期目录会在启动或构建时自动创建。
+- 当前不支持跨系统构建，也不支持在 Apple Silicon 上直接产出 `macos-x86_64` 包。
 - `--target macos-arm64 --skip-installer` 会跳过安装包构建
 - `./build_release.sh` 会自动识别当前机器对应的打包目标
 常用命令：

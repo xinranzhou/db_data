@@ -1,26 +1,38 @@
 @echo off
-REM 一键安装启动脚本 (Windows)
+REM 源码环境一键安装脚本 (Windows)
 
 echo ==================================
-echo DP采集器 - 一键安装
+echo DP采集器 - 源码环境安装
 echo ==================================
 echo.
 
 REM 检查 Python
-python --version >nul 2>&1
-if %errorlevel% neq 0 (
+set PYTHON_CMD=
+set PYTHON_ARGS=
+py -3.11 --version >nul 2>&1
+if %errorlevel% equ 0 (
+    set PYTHON_CMD=py
+    set PYTHON_ARGS=-3.11
+) else (
+    python --version >nul 2>&1
+    if %errorlevel% equ 0 (
+        set PYTHON_CMD=python
+    )
+)
+
+if "%PYTHON_CMD%"=="" (
     echo ❌ 未找到 Python
-    echo 请先安装 Python 3.8+: https://www.python.org/downloads/
+    echo 请先安装 Python 3.11.x: https://www.python.org/downloads/
     pause
     exit /b 1
 )
 
 echo ✅ 找到 Python
-python --version
+%PYTHON_CMD% %PYTHON_ARGS% --version
 echo.
 
 REM 运行安装脚本
-python install.py
+%PYTHON_CMD% %PYTHON_ARGS% install.py
 
 echo.
 pause
