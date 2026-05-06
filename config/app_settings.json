@@ -5,8 +5,8 @@
     "workspace": "默认工作区"
   },
   "auth": {
-    "token": "mock-token-4ebc90d1c5eb4b889bc3fded3ab2c872",
-    "expires_at": 1778086487273,
+    "token": "mock-token-4fd85fa313df419885487edd00cbf4a7",
+    "expires_at": 1778691371710,
     "timestamp": "",
     "admin": {
       "id": "930e3161-de3f-4cae-b815-9e7dc238995d",

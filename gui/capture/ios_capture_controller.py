@@ -140,5 +140,5 @@ class IOSCaptureController:
             lines.extend(["", "调试信息:"])
             lines.extend(debug_lines)
 
-        QMessageBox.information(self.editor, "iOS 抓包检查", "\n".join(lines))
+        QMessageBox.information(self.editor, "iOS 配置检查", "\n".join(lines))
         return local_proxy_ok and local_ca_ok

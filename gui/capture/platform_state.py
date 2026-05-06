@@ -60,4 +60,4 @@ class CapturePlatformState:
 
     @property
     def https_button_text(self) -> str:
-        return "iOS 抓包检查" if self.is_ios else "HTTPS 诊断"
+        return "iOS 配置检查" if self.is_ios else "HTTPS 诊断"
