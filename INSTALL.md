@@ -3,7 +3,7 @@
 ## 运行环境
 
 - 源码运行：Python `3.11+`
-- 本地打包：Python `3.11.x`
+- 本地打包：Python `3.11 - 3.13`
 - Windows `10/11 x64`
 - macOS `10.14+`
 - 项目运行依赖 `PyQt5`、`mitmproxy`、`playwright`
@@ -15,7 +15,7 @@
   - `macos-x86_64`
   - `windows-x64`
 - Linux 目前只建议源码运行，不在 `build_app.py` 官方打包目标内。
-- 本地打包当前固定使用 `Python 3.11.x`，不要使用 `Python 3.12+ / 3.13+`。
+- 本地打包当前支持 `Python 3.11 - 3.13`，其中 `3.11.x` 与 CI 保持一致、最稳妥。
 - 正式打包产物会内置 `mitmdump-helper`，正常运行不依赖系统级 `mitmproxy`。
 - 源码运行时仍需通过 `requirements.txt` 安装 `mitmproxy` Python 包。
 
@@ -108,7 +108,7 @@ Windows PowerShell:
 或直接：
 
 ```bash
-python3.11 bootstrap_build.py
+python3 bootstrap_build.py
 ```
 
 它会自动：

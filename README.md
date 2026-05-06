@@ -45,7 +45,7 @@ pip install -r requirements.txt
 - 当前项目不需要 `uv`，直接使用 `venv + pip` 即可。
 - 如果你本机已经长期使用 `uv` 管理 Python 环境，也可以正常运行本项目，但当前仓库没有 `pyproject.toml` / `uv.lock`，所以这里推荐使用 `uv venv + uv pip`，不要用 `uv sync`。
 - 本地运行建议使用 `Python 3.11+`，其中 `3.11.x` 最稳妥。
-- 本地打包当前固定使用 `Python 3.11.x`，不要使用 `Python 3.12+ / 3.13+`。
+- 本地打包当前支持 `Python 3.11 - 3.13`，其中 `3.11.x` 与 CI 保持一致、最稳妥。
 - 当前主链依赖已收敛为：
   - `PyQt5`
   - `mitmproxy`
@@ -73,7 +73,7 @@ python -m playwright install chromium
 
 ```bash
 cd /Users/xinranzhou/Documents/zft/auto_ocr/py_test
-uv venv --python 3.11 .venv
+uv venv --python 3.13 .venv
 source .venv/bin/activate
 uv pip install -r requirements.txt
 python node_editor_app.py
@@ -90,7 +90,7 @@ python -m playwright install chromium
 
 ```bash
 cd /Users/xinranzhou/Documents/zft/auto_ocr/py_test
-uv venv --python 3.11 .venv
+uv venv --python 3.13 .venv
 uv pip install -r requirements.txt
 uv run --python .venv/bin/python python node_editor_app.py
 ```
@@ -128,7 +128,7 @@ python -m playwright install chromium
 ```bash
 cd /Users/xinranzhou/Documents/zft/auto_ocr/py_test
 rm -rf .venv .build-venvs build dist installer __pycache__
-uv venv --python 3.11 .venv
+uv venv --python 3.13 .venv
 source .venv/bin/activate
 uv pip install -r requirements.txt
 python -m playwright install chromium
@@ -210,7 +210,7 @@ cd /Users/xinranzhou/Documents/zft/auto_ocr/py_test
 
 - macOS：`./build_release.sh`
 - Windows PowerShell：`.\build_release.ps1`
-- 或直接：`python3.11 bootstrap_build.py`
+- 或直接：`python3 bootstrap_build.py`
 
 统一构建入口会自动：
 
@@ -225,8 +225,8 @@ cd /Users/xinranzhou/Documents/zft/auto_ocr/py_test
 
 说明：
 
-- GitHub Actions 仍然使用 `3.11`。
-- 本地如果当前默认 `python3` 是 `3.13`，请显式改用 `python3.11` 再执行构建。
+- GitHub Actions 当前仍然使用 `3.11` 作为稳定构建基线。
+- 本地构建可直接使用 `3.11`、`3.12` 或 `3.13`。
 - 如果之前已经用别的 Python 版本创建过 `.build-venvs/`，构建脚本会自动重建对应虚拟环境。
 - 发布产物当前不再内置 Playwright Chromium，避免安装包体积失控。
 - 新机器拉代码后，`data/` 与 `tools/` 只需要仓库里的骨架文件即可，运行期目录会在启动或构建时自动创建。

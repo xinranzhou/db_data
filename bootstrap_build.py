@@ -127,9 +127,9 @@ def ensure_supported_build_python(python_path: Path):
     )
     version_text = result.stdout.strip()
     major, minor, _patch = [int(part) for part in version_text.split(".")]
-    if (major, minor) != (3, 11):
+    if (major, minor) not in {(3, 11), (3, 12), (3, 13)}:
         raise RuntimeError(
-            f"当前构建 Python 为 {version_text}，本项目本地打包当前只支持 Python 3.11.x。"
+            f"当前构建 Python 为 {version_text}，本项目本地打包当前只支持 Python 3.11 - 3.13。"
         )
 
 

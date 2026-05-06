@@ -17,10 +17,14 @@ else
 fi
 
 PYTHON_CMD=""
-if command -v python3.11 >/dev/null 2>&1; then
-  PYTHON_CMD="python3.11"
-elif command -v python3 >/dev/null 2>&1; then
+if command -v python3 >/dev/null 2>&1; then
   PYTHON_CMD="python3"
+elif command -v python3.13 >/dev/null 2>&1; then
+  PYTHON_CMD="python3.13"
+elif command -v python3.12 >/dev/null 2>&1; then
+  PYTHON_CMD="python3.12"
+elif command -v python3.11 >/dev/null 2>&1; then
+  PYTHON_CMD="python3.11"
 elif command -v python >/dev/null 2>&1; then
   PYTHON_CMD="python"
 fi
@@ -31,9 +35,9 @@ if [ -z "$PYTHON_CMD" ]; then
   exit 1
 fi
 
-if ! "$PYTHON_CMD" -c 'import sys; raise SystemExit(0 if sys.version_info[:2] == (3, 11) else 1)' >/dev/null 2>&1; then
+if ! "$PYTHON_CMD" -c 'import sys; raise SystemExit(0 if sys.version_info[:2] in {(3, 11), (3, 12), (3, 13)} else 1)' >/dev/null 2>&1; then
   echo "❌ Python 版本不受支持: $($PYTHON_CMD --version 2>&1)"
-  echo "   本地构建当前固定使用 Python 3.11.x"
+  echo "   本地构建当前支持 Python 3.11 - 3.13"
   exit 1
 fi
 
