@@ -98,3 +98,7 @@ test_screenshot.png
 xxx.txtx
 *.bak
 * copy/
+
+data/capture_assets/mitmproxy-ca-cert.cer
+data/capture_assets/mitmproxy-ca-cert.p12
+data/capture_assets/mitmproxy-ca-cert.pem

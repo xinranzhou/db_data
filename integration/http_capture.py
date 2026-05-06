@@ -98,6 +98,12 @@ class HttpCaptureManager:
         if self._handle_early_exit():
             return False, self._build_failure_message("抓取服务启动后很快退出")
 
+        proxy_host, proxy_port = self.get_proxy_address(capture_settings)
+        proxy_ready, proxy_output = self.check_local_port(proxy_host, proxy_port, timeout=1.5)
+        if not proxy_ready:
+            self.stop()
+            return False, f"抓取服务进程已启动，但 {proxy_port} 端口未监听成功: {proxy_output}\n日志: {self.log_path}"
+
         asset_ok, asset_message = self.start_asset_server(capture_settings)
         logger.info("HTTP 抓取服务已启动: PID={}", self.process.pid)
         if asset_ok:
@@ -259,6 +265,7 @@ class HttpCaptureManager:
             return True, "CA 下载服务已在运行"
 
         try:
+            self.ensure_ca_assets_ready()
             self.asset_server = CACertAssetServer(
                 self.get_ca_paths(),
                 host=host,
@@ -266,6 +273,10 @@ class HttpCaptureManager:
                 public_host=public_host,
             )
             self.asset_server.start()
+            ca_ok, ca_output = self.check_local_port(public_host, asset_port, timeout=1.5)
+            if not ca_ok:
+                self.stop_asset_server()
+                return False, f"CA 下载服务进程已启动，但 {asset_port} 端口未监听成功: {ca_output}"
             return True, "CA 下载服务已启动"
         except Exception as exc:
             self.asset_server = None
@@ -365,7 +376,47 @@ class HttpCaptureManager:
         return {
             "pem": Settings.CAPTURE_ASSET_DIR / "mitmproxy-ca-cert.pem",
             "cer": Settings.CAPTURE_ASSET_DIR / "mitmproxy-ca-cert.cer",
+            "p12": Settings.CAPTURE_ASSET_DIR / "mitmproxy-ca-cert.p12",
         }
+
+    def ensure_ca_assets_ready(self):
+        target_paths = self.get_ca_paths()
+        if target_paths["pem"].exists() and target_paths["cer"].exists():
+            return target_paths
+
+        for source_dir in self._candidate_mitmproxy_ca_dirs():
+            copied_any = False
+            for name, target_path in target_paths.items():
+                source_path = source_dir / f"mitmproxy-ca-cert.{name}"
+                if source_path.exists():
+                    target_path.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(source_path, target_path)
+                    copied_any = True
+            if copied_any and target_paths["pem"].exists() and target_paths["cer"].exists():
+                logger.info("已同步 mitmproxy CA 文件到 {}", Settings.CAPTURE_ASSET_DIR)
+                return target_paths
+
+        logger.warning("未找到可同步的 mitmproxy CA 文件，已检查目录: {}", ", ".join(str(path) for path in self._candidate_mitmproxy_ca_dirs()))
+        return target_paths
+
+    @staticmethod
+    def _candidate_mitmproxy_ca_dirs() -> list[Path]:
+        home = Path.home()
+        candidates = [
+            home / ".mitmproxy",
+            home / "Library" / "Application Support" / "mitmproxy",
+            Settings.BASE_DIR / ".mitmproxy",
+            Settings.RESOURCE_DIR / ".mitmproxy",
+        ]
+        result: list[Path] = []
+        seen: set[str] = set()
+        for path in candidates:
+            key = str(path)
+            if key in seen:
+                continue
+            seen.add(key)
+            result.append(path)
+        return result
 
     def get_ca_install_url(self, capture_settings: dict):
         host, _ = self.get_proxy_address(capture_settings)
