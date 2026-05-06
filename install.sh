@@ -8,15 +8,15 @@ echo ""
 
 # 检查 Python
 PYTHON_CMD=""
-if command -v python3.11 >/dev/null 2>&1; then
-    PYTHON_CMD="python3.11"
-elif command -v python3 >/dev/null 2>&1; then
+if command -v python3 >/dev/null 2>&1; then
     PYTHON_CMD="python3"
+elif command -v python3.11 >/dev/null 2>&1; then
+    PYTHON_CMD="python3.11"
 fi
 
 if [ -z "$PYTHON_CMD" ]; then
     echo "❌ 未找到 Python 3"
-    echo "请先安装 Python 3.11.x: https://www.python.org/downloads/"
+    echo "请先安装 Python 3.11+: https://www.python.org/downloads/"
     exit 1
 fi
 

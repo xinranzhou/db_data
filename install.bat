@@ -9,20 +9,19 @@ echo.
 REM 检查 Python
 set PYTHON_CMD=
 set PYTHON_ARGS=
-py -3.11 --version >nul 2>&1
+python --version >nul 2>&1
 if %errorlevel% equ 0 (
-    set PYTHON_CMD=py
-    set PYTHON_ARGS=-3.11
+    set PYTHON_CMD=python
 ) else (
-    python --version >nul 2>&1
+    py --version >nul 2>&1
     if %errorlevel% equ 0 (
-        set PYTHON_CMD=python
+        set PYTHON_CMD=py
     )
 )
 
 if "%PYTHON_CMD%"=="" (
     echo ❌ 未找到 Python
-    echo 请先安装 Python 3.11.x: https://www.python.org/downloads/
+    echo 请先安装 Python 3.11+: https://www.python.org/downloads/
     pause
     exit /b 1
 )

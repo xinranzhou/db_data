@@ -2,7 +2,8 @@
 
 ## 运行环境
 
-- Python `3.11.x`
+- 源码运行：Python `3.11+`
+- 本地打包：Python `3.11.x`
 - Windows `10/11 x64`
 - macOS `10.14+`
 - 项目运行依赖 `PyQt5`、`mitmproxy`、`playwright`

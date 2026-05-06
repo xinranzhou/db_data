@@ -19,8 +19,8 @@ def run(cmd: list[str]):
 def check_python_version():
     """检查 Python 版本。"""
     version = sys.version_info
-    if (version.major, version.minor) != (3, 11):
-        print("❌ Python 版本不受支持，需要 Python 3.11.x")
+    if version.major != 3 or version.minor < 11:
+        print("❌ Python 版本不受支持，需要 Python 3.11+")
         print(f"   当前版本: {sys.version}")
         return False
 

@@ -44,7 +44,7 @@ pip install -r requirements.txt
 
 - 当前项目不需要 `uv`，直接使用 `venv + pip` 即可。
 - 如果你本机已经长期使用 `uv` 管理 Python 环境，也可以正常运行本项目，但当前仓库没有 `pyproject.toml` / `uv.lock`，所以这里推荐使用 `uv venv + uv pip`，不要用 `uv sync`。
-- 本地运行建议使用 `Python 3.11.x`。
+- 本地运行建议使用 `Python 3.11+`，其中 `3.11.x` 最稳妥。
 - 本地打包当前固定使用 `Python 3.11.x`，不要使用 `Python 3.12+ / 3.13+`。
 - 当前主链依赖已收敛为：
   - `PyQt5`
